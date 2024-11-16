@@ -58,7 +58,10 @@ extern "C" void GetFrame(void* cap, unsigned char** buffer, int* rows, int* cols
     *rows = frame.rows;
     *cols = frame.cols;
     *channels = frame.channels();
-    *buffer = frame.data;
+
+    size_t dataSize = frame.total() * frame.elemSize();
+    *buffer = new unsigned char[dataSize];
+    std::memcpy(*buffer, frame.data, dataSize);
 }
 
 extern "C" void externalFunction(int value)
