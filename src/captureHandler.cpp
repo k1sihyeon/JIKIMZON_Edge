@@ -29,8 +29,8 @@ void CaptureHandler::StartCapture()
     cap.set(cv::CAP_PROP_FRAME_HEIGHT, HEIGHT);
     cap.set(cv::CAP_PROP_FPS, 30);
 
-    TcpHandler::GetInstance().InitSocket();
-    ObjectHandler::GetInstance().InitModel("../src/ssd_mobilenet_v2_taco_2018_03_29.pb");
+    //TcpHandler::GetInstance().InitSocket();
+    ObjectHandler::GetInstance().InitModel("/home/sihyeon/workspace/JIKIMZON_Edge/res/best.onnx");
 
     int width = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH));
     int height = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT));
@@ -38,7 +38,7 @@ void CaptureHandler::StartCapture()
     std::vector<uint8_t> encodedFrame;
 
     cv::Mat inFrame;
-    cv::Mat outData;
+    std::vector<cv::Mat> outData;
 
     while (true) {
         if (!cap.read(inFrame))
@@ -66,6 +66,6 @@ void CaptureHandler::StartCapture()
         // TODO: 암호화
         
         // tcp 전송
-        TcpHandler::GetInstance().SendFrame(encodedFrame);
+        //TcpHandler::GetInstance().SendFrame(encodedFrame);
     }
 }
