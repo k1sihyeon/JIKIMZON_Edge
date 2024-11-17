@@ -37,7 +37,7 @@ void CaptureHandler::StartCapture()
     char buf[PATH_MAX];
     getcwd(buf, PATH_MAX);
     std::string path(buf);
-    ObjectHandler::GetInstance().InitModel(path + "/res/best.onnx");
+    ObjectHandler::GetInstance().InitModel(path + "/res/yolov5n-garbage.onnx");
 
     int width = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH));
     int height = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT));
