@@ -3,6 +3,9 @@
 #include "encodeHandler.hpp"
 #include "objectHandler.hpp"
 
+#include <unistd.h>
+#include <limits.h>
+
 #include <opencv2/opencv.hpp>
 
 CaptureHandler* CaptureHandler::sInstance = nullptr;
@@ -29,8 +32,12 @@ void CaptureHandler::StartCapture()
     cap.set(cv::CAP_PROP_FRAME_HEIGHT, HEIGHT);
     cap.set(cv::CAP_PROP_FPS, 30);
 
-    //TcpHandler::GetInstance().InitSocket();
-    ObjectHandler::GetInstance().InitModel("/home/sihyeon/workspace/JIKIMZON_Edge/res/best.onnx");
+    TcpHandler::GetInstance().InitSocket();
+
+    char buf[PATH_MAX];
+    getcwd(buf, PATH_MAX);
+    std::string path(buf);
+    ObjectHandler::GetInstance().InitModel(path + "/res/best.onnx");
 
     int width = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH));
     int height = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT));
@@ -38,7 +45,6 @@ void CaptureHandler::StartCapture()
     std::vector<uint8_t> encodedFrame;
 
     cv::Mat inFrame;
-    std::vector<cv::Mat> outData;
 
     while (true) {
         if (!cap.read(inFrame))
@@ -56,8 +62,14 @@ void CaptureHandler::StartCapture()
         // TODO: 전처리
 
         // 모델 추론
-        outData = ObjectHandler::GetInstance().DetectObject(inFrame);
+        std::vector<object::Detection> detections;
+        detections = ObjectHandler::GetInstance().DetectObject(inFrame);
         
+        for (const auto& detection : detections)
+        {
+            std::cout << "class: " << detection.className << ", confidence: " << detection.confidence << std::endl;
+        }
+
         // TODO: 결과 파싱, json화, 전송
         
         // h.264 압축
@@ -66,6 +78,6 @@ void CaptureHandler::StartCapture()
         // TODO: 암호화
         
         // tcp 전송
-        //TcpHandler::GetInstance().SendFrame(encodedFrame);
+        TcpHandler::GetInstance().SendFrame(encodedFrame);
     }
 }

@@ -13,104 +13,90 @@ ObjectHandler& ObjectHandler::GetInstance()
     return *sInstance;
 }
 
-void ObjectHandler::InitModel(std::string path)
+void ObjectHandler::InitModel(const std::string& path, const cv::Size &inputShape)
 {
-    try
-    {
-        //mMobileNet = cv::dnn::readNetFromTensorflow(path);
-        mMobileNet = cv::dnn::readNetFromONNX(path);
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << "Initmodel: \n" << e.what() << '\n';
-    }
-    
-    
+    mYoloNet = cv::dnn::readNetFromONNX(path);
+    mModelInputShape = inputShape;
 }
 
-cv::Mat ObjectHandler::DetectObject(cv::Mat& frame)
+std::vector<object::Detection> ObjectHandler::DetectObject(cv::Mat& frame)
 {
     // 이미지를 모델 입력 크기에 맞추기
-    cv::Mat blob = cv::dnn::blobFromImage(frame, 1 / 255.0, cv::Size(640, 640), cv::Scalar(0, 0, 0), true, false);
+    cv::Mat blob = cv::dnn::blobFromImage(frame, 1 / 255.0, mModelInputShape, cv::Scalar(0, 0, 0), true, false);
     
-    try
-    {
-        // 모델에 이미지 입력
-        mMobileNet.setInput(blob);
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << "setInput: \n" << e.what() << '\n';
-    }
+    mYoloNet.setInput(blob);
     
-    cv::Mat output;
-
     std::vector<cv::Mat> outputs;
+    std::vector<int> class_ids;
+    std::vector<float> confidences;
+    std::vector<cv::Rect> boxes;
 
+    // 모델 추론
+    mYoloNet.forward(outputs, mYoloNet.getUnconnectedOutLayersNames());
 
-    try
+    if (outputs.empty())
     {
-        // 모델 추론
-        ///*cv::Mat*/ output = mMobileNet.forward();
-        mMobileNet.forward(outputs, mMobileNet.getUnconnectedOutLayersNames());
+        std::cerr << "output is empty" << std::endl;
+        // exit(EXIT_FAILURE);
+    }
 
-        if (outputs.empty())
-        {
-            std::cerr << "output is empty" << std::endl;
-            return output;
-        }
+    int rows = outputs[0].size[1];          // 탐지된 객체 수
+    int dimensions = outputs[0].size[2];    // 탐지된 객체 정보 수
+    float* data = (float*)outputs[0].data;  // 탐지된 객체 정보
 
-        float* data = (float*)outputs[0].data;
-        const int dimensions = 85;            // YOLOv5의 출력 차원
-        const int rows = outputs[0].size[1];  // 탐지된 객체 수
+    float x_factor = frame.cols / mModelInputShape.width;   // x 축 비율
+    float y_factor = frame.rows / mModelInputShape.height;  // y 축 비율
 
-        for (int i = 0; i < rows; ++i)
-        {
-            float confidence = data[i * dimensions + 4];
-            if (confidence > 500)
+    for (int i = 0; i < rows; i++)
+    {
+        float confidence = data[4];
+
+        if (confidence > 0.5) {
+            float* classes_scores = data + 5;
+
+            cv::Mat scores(1, mObjClasses.size(), CV_32FC1, classes_scores);
+            cv::Point class_id;
+            double max_class_score;
+
+            cv::minMaxLoc(scores, 0, &max_class_score, 0, &class_id);
+
+            if (max_class_score > mScoreThreshold)
             {
-                // 바운딩 박스 좌표 변환 (x_center, y_center, width, height -> x1, y1, x2, y2)
-                float x_center = data[i * dimensions + 0] * frame.cols;
-                float y_center = data[i * dimensions + 1] * frame.rows;
-                float width = data[i * dimensions + 2] * frame.cols;
-                float height = data[i * dimensions + 3] * frame.rows;
+                float x = data[0];
+                float y = data[1];
+                float w = data[2];
+                float h = data[3];
 
-                float x1 = x_center - width / 2;
-                float y1 = y_center - height / 2;
-                float x2 = x_center + width / 2;
-                float y2 = y_center + height / 2;
+                int left = int((x - 0.5 * w) * x_factor);
+                int top = int((y - 0.5 * h) * y_factor);
+                int width = int(w * x_factor);
+                int height = int(h * y_factor);
 
-                // 클래스 점수 계산
-                cv::Mat scores(1, dimensions - 5, CV_32FC1, data + i * dimensions + 5);
-                cv::Point classIdPoint;
-                double maxClassScore;
-                minMaxLoc(scores, 0, &maxClassScore, 0, &classIdPoint);
-                int classId = classIdPoint.x;
-
-                // 필터링
-                if (maxClassScore > 0.3 /*SCORE_THRESHOLD*/) {
-                    // 결과 저장
-                    //detections.push_back({x1, y1, x2, y2, confidence, classId});
-
-                    std::cout << "classId: " << classId << std::endl;
-                    std::cout << "confidence: " << confidence << std::endl;
-                    std::cout << "maxClassScore: " << maxClassScore << std::endl;
-                    std::cout << "x1: " << x1 << std::endl;
-                    std::cout << "y1: " << y1 << std::endl;
-                    std::cout << "x2: " << x2 << std::endl;
-                    std::cout << "y2: " << y2 << std::endl;
-                }
+                boxes.push_back(cv::Rect(left, top, width, height));
+                confidences.push_back(max_class_score);
+                class_ids.push_back(class_id.x);
             }
         }
-
+        data += dimensions;
     }
-    catch(const std::exception& e)
+
+    // NMS: Non-Maximum Suppression - 높은 신뢰도의 객체만 남기고 중복된 객체 제거
+    std::vector<int> nms_result;
+    cv::dnn::NMSBoxes(boxes, confidences, mScoreThreshold, mNMSThreshold, nms_result);
+
+    std::vector<object::Detection> detections;
+    for (unsigned long i = 0; i < nms_result.size(); ++i)
     {
-        std::cerr << "forward: \n" << e.what() << '\n';
+        int idx = nms_result[i];
+
+        object::Detection result;
+        result.classId = class_ids[idx];
+        result.confidence = confidences[idx];
+        result.className = mObjClasses[result.classId];
+        result.box = boxes[idx];
+
+        detections.push_back(result);
     }
-    
 
-    
-
-    return output;
+    return detections;
 }
