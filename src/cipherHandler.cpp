@@ -34,7 +34,7 @@ void CipherHandler::init()
     send(mSock, mKey, sizeof(mKey), 0);
 }
 
-void CipherHandler::EncryptData(const std::vector<uint8_t>& frame, uint8_t* ciphered)
+void CipherHandler::EncryptData(uint8_t* src, int size, uint8_t* dest)
 {
     memset(mIV, 0, sizeof(mIV));
     if (RAND_bytes(mIV, sizeof(mIV)))
@@ -48,19 +48,19 @@ void CipherHandler::EncryptData(const std::vector<uint8_t>& frame, uint8_t* ciph
     }
 
     int len;
-    if (EVP_EncryptUpdate(mCTX, ciphered, &len, frame.data(), frame.size()) != 1)
+    if (EVP_EncryptUpdate(mCTX, dest, &len, src, size) != 1)
     {
         std::cerr << "Error: encrypt update" << std::endl;
     }
 }
 
-void CipherHandler::SendEncryptedData(int dataLen, uint8_t* ciphered)
+void CipherHandler::SendEncryptedData(int size, uint8_t* data)
 {
     send(mSock, mIV, sizeof(mIV), 0);
-    send(mSock, ciphered, dataLen, 0);
+    send(mSock, data, size, 0);
 }
 
-void CipherHandler::decryptData(uint8_t* encryptedFrame, int encryptedFrameSize, uint8_t* decryptedFrame)
+void CipherHandler::decryptData(uint8_t* src, int size, uint8_t* dest)
 {
     memset(mIV, 0, sizeof(mIV));
     if (RAND_bytes(mIV, sizeof(mIV)))
@@ -74,7 +74,7 @@ void CipherHandler::decryptData(uint8_t* encryptedFrame, int encryptedFrameSize,
     }
 
     int len;
-    if (EVP_DecryptUpdate(mCTX, decryptedFrame, &len, encryptedFrame, encryptedFrameSize) != 1)
+    if (EVP_DecryptUpdate(mCTX, dest, &len, src, size) != 1)
     {
         std::cerr << "Error: encrypt update" << std::endl;
     }

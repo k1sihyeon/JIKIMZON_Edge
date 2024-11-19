@@ -9,8 +9,8 @@ public:
     CipherHandler(int sock);
     ~CipherHandler();
 
-    void EncryptData(const std::vector<uint8_t>& frame, uint8_t* ciphered);
-    void SendEncryptedData(int dataLen, uint8_t* ciphered);
+    void EncryptData(uint8_t* src, int size, uint8_t* dest);
+    void SendEncryptedData(int size, uint8_t* data);
     
 private:
     int mSock;
@@ -20,7 +20,7 @@ private:
     EVP_CIPHER_CTX* mCTX;
 
     void init();
-    void decryptData(uint8_t* encryptedFrame, int encryptedFrameSize, uint8_t* decryptedFrame);
+    void decryptData(uint8_t* src, int size, uint8_t* dest);
 };
 
 #endif
