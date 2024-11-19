@@ -13,7 +13,6 @@ public:
     void SendEncryptedData(int dataLen, unsigned char* ciphered);
     
 private:
-    // const char* server_ip;
     unsigned char mKey[32];
     unsigned char mIV[12];
 
