@@ -16,13 +16,10 @@ extern "C" {
 
 class EncodeHandler {
 public:
-    EncodeHandler(const EncodeHandler&) = delete;
-    EncodeHandler& operator=(const EncodeHandler&) = delete;
-
-    static EncodeHandler& GetInstance();
-
-    void EncodeFrame(cv::Mat& frame, std::vector<uint8_t>& encodedFrame);
-
+    EncodeHandler(int width, int height, int bitrate, int fps);
+    ~EncodeHandler();
+    
+    void encodeFrame(cv::Mat& frame, std::vector<uint8_t>& encodedFrame);
 private:
     EncodeHandler(int width, int height, int bitrate, int fps) = default;
     ~EncodeHandler() = default;

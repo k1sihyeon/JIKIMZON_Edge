@@ -1,26 +1,15 @@
 #include "tcpHandler.hpp"
 
-TcpHandler* TcpHandler::sInstance = nullptr;
-
-TcpHandler& TcpHandler::GetInstance()
-{
-    if (sInstance == nullptr)
-	{
-        sInstance = new TcpHandler;
-    }
-    return *sInstance;
-}
-
 void TcpHandler::InitSocket()
 {
-    mSockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (mSockfd < 0)
+  mSockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (mSockfd < 0)
 	{
 		std::cerr << "socket: msockfd" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
-    // Bind socket
+  // Bind socket
 	mServerAddr.sin_family = AF_INET;
 	mServerAddr.sin_addr.s_addr = INADDR_ANY;
 	mServerAddr.sin_port = htons(PORT);

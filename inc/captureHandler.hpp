@@ -8,16 +8,16 @@
 
 class CaptureHandler {
 public:
-    CaptureHandler(const CaptureHandler&) = delete;
-    CaptureHandler& operator=(const CaptureHandler&) = delete;
+    CaptureHandler() = default;
+    ~CaptureHandler() = default;
 
-    static CaptureHandler& GetInstance();
+    void InitCapture(int, int, int, int);
+    bool GetFrame(cv::Mat&);
     void StartCapture();
 
 private:
-    CaptureHandler() = default;
-    ~CaptureHandler() = default;
-    static CaptureHandler* sInstance;
+    cv::VideoCapture mCap;
+    
 };
 
 #endif
