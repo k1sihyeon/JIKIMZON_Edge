@@ -24,6 +24,4 @@ private:
 
 };
 
-V4L2Handler* V4L2Handler::instance = nullptr;
-
 #endif

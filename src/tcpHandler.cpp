@@ -1,8 +1,11 @@
 #include "tcpHandler.hpp"
 
+
+TcpHandler* TcpHandler::instance = nullptr;
+
+
 TcpHandler::TcpHandler() 
 {
-    InitSocket();
 }
 
 TcpHandler::~TcpHandler() {}

@@ -36,6 +36,4 @@ private:
 
 };
 
-TcpHandler* TcpHandler::instance = nullptr;
-
 #endif
