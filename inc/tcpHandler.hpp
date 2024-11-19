@@ -16,6 +16,7 @@ public:
     
     void InitSocket();
     void SendFrame(const std::vector<uchar>& frame);
+    int GetSock();
 
 private:
     

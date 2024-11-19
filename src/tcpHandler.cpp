@@ -46,3 +46,8 @@ void TcpHandler::SendFrame(const std::vector<uchar>& frame)
         perror("send");
     }
 }
+
+int TcpHandler::GetSock()
+{
+	return mClientSock;
+}
