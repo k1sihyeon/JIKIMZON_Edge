@@ -26,8 +26,8 @@ public:
 private:
     cv::dnn::Net mYoloNet;
     cv::Size mModelInputShape   = {640, 640};
-    float mConfidenceThreshold  = 0.25;
-    float mScoreThreshold       = 0.45;
+    float mConfidenceThreshold  = 0.65;
+    float mScoreThreshold       = 0.55;
     float mNMSThreshold         = 0.50;
     std::vector<std::string> mObjClasses = {
         "biodegradable", "cardboard", "glass", "metal", "paper", "plastic"
