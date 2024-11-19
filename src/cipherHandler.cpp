@@ -20,13 +20,15 @@ CipherHandler::~CipherHandler()
 
 void CipherHandler::init()
 {
+    OpenSSL_add_all_algorithms();
+
     mCTX = EVP_CIPHER_CTX_new();
-    if (mCTX != 0)
+    if (mCTX == nullptr)
     {
         std::cerr << "Error: new ctx" << std::endl;
     }
 
-    if (RAND_bytes(mKey, sizeof(mKey)))
+    if (!RAND_bytes(mKey, sizeof(mKey)))
     {
         std::cerr << "Error: generate key" << std::endl;
     }
@@ -34,10 +36,10 @@ void CipherHandler::init()
     send(mSock, mKey, sizeof(mKey), 0);
 }
 
-void CipherHandler::EncryptData(uint8_t* src, int size, uint8_t* dest)
+void CipherHandler::EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest)
 {
     memset(mIV, 0, sizeof(mIV));
-    if (RAND_bytes(mIV, sizeof(mIV)))
+    if (!RAND_bytes(mIV, sizeof(mIV)))
     {
         std::cerr << "Error: generate iv" << std::endl;
     }
@@ -48,7 +50,7 @@ void CipherHandler::EncryptData(uint8_t* src, int size, uint8_t* dest)
     }
 
     int len;
-    if (EVP_EncryptUpdate(mCTX, dest, &len, src, size) != 1)
+    if (EVP_EncryptUpdate(mCTX, dest, &len, src.data(), size) != 1)
     {
         std::cerr << "Error: encrypt update" << std::endl;
     }

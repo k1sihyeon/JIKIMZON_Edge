@@ -1,6 +1,8 @@
 #ifndef JIKIMZON_CIPHERHANDLER_H
 #define JIKIMZON_CIPHERHANDLER_H
 
+#include <vector>
+#include <cstdint>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 
@@ -9,7 +11,7 @@ public:
     CipherHandler(int sock);
     ~CipherHandler();
 
-    void EncryptData(uint8_t* src, int size, uint8_t* dest);
+    void EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest);
     void SendEncryptedData(int size, uint8_t* data);
     
 private:

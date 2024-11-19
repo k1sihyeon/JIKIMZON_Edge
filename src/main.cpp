@@ -32,7 +32,9 @@ int main()
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
     std::vector<uint8_t> encodedFrame;
-    uint8_t excryptedFrame[PATH_MAX];;
+    // uint8_t encodedFrame[PATH_MAX];
+    uint8_t encryptedFrame[PATH_MAX];
+    uint8_t decryptedFrame[PATH_MAX];
 
     while (true) 
     {
@@ -45,23 +47,36 @@ int main()
         // TODO: 전처리
 
         // 모델 추론
-        std::vector<object::Detection> detections;
-        detections = objHandler.DetectObject(inFrame);
+        // std::vector<object::Detection> detections;
+        // detections = objHandler.DetectObject(inFrame);
         
-        for (const auto& detection : detections)
-        {
-            std::cout << "class: " << detection.className << ", confidence: " << detection.confidence << std::endl;
-        }
+        // for (const auto& detection : detections)
+        // {
+        //     std::cout << "class: " << detection.className << ", confidence: " << detection.confidence << std::endl;
+        // }
 
         // TODO: 결과 파싱, json화, 전송
         
         // h.264 압축
         encodeHandler.EncodeFrame(inFrame, encodedFrame);
-
+        std::cout << "Encoded: ";
+        for (int i = 0; i < 10; i++)
+        {
+            std::cout << encodedFrame[i] << " ";
+        }
+        std:: cout << std::endl;
+        
         // 암호화 전송
         cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
-        cipherHandler.SendEncryptedData(sizeof(encodedFrame), encryptedFrame);
-        
+        std::cout << "Encrypted: ";
+        for (int i = 0; i < 10; i++)
+        {
+            std::cout << encryptedFrame[i] << " ";
+        }
+        std:: cout << std::endl;
+        // cipherHandler.SendEncryptedData(sizeof(encodedFrame), encryptedFrame);
+        // cipherHandler.decryptData(encryptedFrame, sizeof(encryptedFrame));
+
         // tcp 전송
         // tcpHandler.SendFrame(encodedFrame); 
     }
