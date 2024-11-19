@@ -6,13 +6,14 @@
 
 class CipherHandler {
 public:
-    CipherHandler();
+    CipherHandler(int sock);
     ~CipherHandler();
 
-    void EncryptData(const unsigned char* data, int dataLen, unsigned char* ciphered);
-    void SendEncryptedData(int dataLen, unsigned char* ciphered);
+    void EncryptData(const std::vector<uchar>& frame, uint8_t& ciphered);
+    void SendEncryptedData(int dataLen, uint8_t* ciphered);
     
 private:
+    int mSock;
     unsigned char mKey[32];
     unsigned char mIV[12];
 

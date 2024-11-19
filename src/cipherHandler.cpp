@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-CipherHandler::CipherHandler() : mCTX(nullptr)
+CipherHandler::CipherHandler(int sock) : mSock(sock), mCTX(nullptr)
 {
     init();
 }
@@ -29,10 +29,10 @@ void CipherHandler::init()
         std::cerr << "Error: generate key" << std::endl;
     }
 
-    send(TcpHandler::GetSock(), mKey, sizeof(mKey), 0);
+    send(mSock, mKey, sizeof(mKey), 0);
 }
 
-void CipherHandler::EncryptData(const unsigned char* data, int dataLen, unsigned char* ciphered)
+void CipherHandler::EncryptData(const std::vector<uchar>& frame, uint8_t& ciphered)
 {
     memset(mIV, 0, sizeof(mIV));
     if (RAND_bytes(mIV, sizeof(mIV)))
@@ -46,14 +46,14 @@ void CipherHandler::EncryptData(const unsigned char* data, int dataLen, unsigned
     }
 
     int len;
-    if (EVP_EncryptUpdate(mCTX, ciphered, &len, data, dataLen) != 1)
+    if (EVP_EncryptUpdate(mCTX, ciphered, &len, frame.data(), frame.size()) != 1)
     {
         std::cerr << "Error: encrypt update" << std::endl;
     }
 }
 
-void CipherHandler::SendEncryptedData(int dataLen, unsigned char* ciphered)
+void CipherHandler::SendEncryptedData(int dataLen, uint8_t* ciphered)
 {
-    send(TcpHandler::GetSock(), mIV, sizeof(mIV), 0);
-    send(TcpHandler::GetSock(), ciphered, , 0);
+    send(mSock, mIV, sizeof(mIV), 0);
+    send(mSock, ciphered, , 0);
 }

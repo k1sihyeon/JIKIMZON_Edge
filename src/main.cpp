@@ -2,6 +2,7 @@
 #include "tcpHandler.hpp"
 #include "encodeHandler.hpp"
 #include "objectHandler.hpp"
+#include "cipherHandler.hpp"
 
 #include <unistd.h>
 #include <limits.h>
@@ -24,12 +25,14 @@ int main()
     TcpHandler tcpHandler;
     ObjectHandler objHandler;
     EncodeHandler encodeHandler(width, height, bitrate, fps);
+    CipherHandler cipherHandler(tcpHandler.GetSock());
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
     tcpHandler.InitSocket();
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
     std::vector<uint8_t> encodedFrame;
+    uint8_t excryptedFrame[PATH_MAX];;
 
     while (true) 
     {
@@ -55,9 +58,11 @@ int main()
         // h.264 압축
         encodeHandler.EncodeFrame(inFrame, encodedFrame);
 
-        // TODO: 암호화
+        // 암호화 전송
+        cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
+        cipherHandler.SendEncryptedData(sizeof(encodedFrame), encryptedFrame);
         
         // tcp 전송
-        tcpHandler.SendFrame(encodedFrame); 
+        // tcpHandler.SendFrame(encodedFrame); 
     }
 }
