@@ -1,24 +1,31 @@
 #include "libcapture.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 int main() {
     void* cap;
-    InitCapture(&cap, 0, 640, 480, 30);
+    int width = 1280;
+    int height = 720;
+    int fps = 30;
 
-    unsigned char* buffer;
-    int rows, cols, channels;
+    InitCapture(&cap, 0, width, height, fps);
 
-    GetFrame(cap, &buffer, &rows, &cols, &channels);
+    printf("Capture device opened\n");
 
-    if (buffer) {
-        printf("Frame captured: %dx%d with %d channels\n", rows, cols, channels);
-    } else {
+    uint8_t* buffer;
+
+    while (!GetFrame(cap, &buffer)) {
         printf("Failed to capture frame\n");
     }
 
-    //externalFunction(42);
+    printf("Frame captured\n");
+    
+    for (int i = 0; i < 10; i++) {
+        printf("%d ", buffer[i]);
+    }
 
-    free(cap);
+    //externalFunction(42);
 
     return 0;
 }

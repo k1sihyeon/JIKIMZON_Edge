@@ -25,19 +25,14 @@ void _initCapture(cv::VideoCapture* cap, int camIdx, int width, int height, int 
     cap->set(cv::CAP_PROP_FPS, fps);
 }
 
-cv::Mat _getFrame(cv::VideoCapture* cap)
+bool _getFrame(cv::VideoCapture* cap, cv::Mat& frame)
 {
-    cv::Mat frame;
-
-     while (!cap->read(frame))
+    if (!cap->read(frame) || frame.empty())
     {
-        if (!frame.empty())
-        {
-            break;
-        }
+        return false;
     }
 
-    return frame;
+    return true;
 }
 
 }
@@ -50,18 +45,23 @@ extern "C" void InitCapture(void** cap, int camIdx, int width, int height, int f
     *cap = static_cast<void*>(capture);
 }
 
-extern "C" void GetFrame(void* cap, unsigned char** buffer, int* rows, int* cols, int* channels)
+extern "C" bool GetFrame(void* cap, uint8_t** buffer)
 {
     auto* capture = static_cast<cv::VideoCapture*>(cap);
-    cv::Mat frame = _getFrame(capture);
+    cv::Mat frame;
 
-    *rows = frame.rows;
-    *cols = frame.cols;
-    *channels = frame.channels();
-
-    size_t dataSize = frame.total() * frame.elemSize();
-    *buffer = new unsigned char[dataSize];
-    std::memcpy(*buffer, frame.data, dataSize);
+    if (_getFrame(capture, frame))
+    {
+        int dataSize = frame.cols * frame.rows * frame.elemSize();
+        *buffer = new uint8_t[dataSize];
+        std::memcpy(*buffer, frame.data, dataSize);
+        
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 extern "C" void externalFunction(int value)
