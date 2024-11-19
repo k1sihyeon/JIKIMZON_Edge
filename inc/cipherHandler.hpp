@@ -9,14 +9,11 @@ public:
     CipherHandler();
     ~CipherHandler();
 
-    void EncryptData(const unsigned char* data, int dataLen,
-                const unsigned char* key, const unsigned char* iv,
-                unsigned char* ciphered);
+    void EncryptData(const unsigned char* data, int dataLen, unsigned char* ciphered);
     void SendEncryptedData(int dataLen, unsigned char* ciphered);
     
 private:
     // const char* server_ip;
-    const int mPort = 1234;
     unsigned char mKey[32];
     unsigned char mIV[12];
 

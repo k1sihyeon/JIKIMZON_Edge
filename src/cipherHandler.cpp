@@ -32,9 +32,7 @@ void CipherHandler::init()
     send(TcpHandler::GetSock(), mKey, sizeof(mKey), 0);
 }
 
-void CipherHandler::EncryptData(const unsigned char* data, int dataLen,
-                const unsigned char* key, const unsigned char* iv,
-                unsigned char* ciphered)
+void CipherHandler::EncryptData(const unsigned char* data, int dataLen, unsigned char* ciphered)
 {
     memset(mIV, 0, sizeof(mIV));
     if (RAND_bytes(mIV, sizeof(mIV)))
@@ -42,7 +40,7 @@ void CipherHandler::EncryptData(const unsigned char* data, int dataLen,
         std::cerr << "Error: generate iv" << std::endl;
     }
 
-    if (EVP_EncryptInit_ex(mCTX, EVP_chacha20(), nullptr, key, iv) != 1)
+    if (EVP_EncryptInit_ex(mCTX, EVP_chacha20(), nullptr, mKey, mIV) != 1)
     {
         std::cerr << "Error: encrypt init" << std::endl;
     }
@@ -56,6 +54,6 @@ void CipherHandler::EncryptData(const unsigned char* data, int dataLen,
 
 void CipherHandler::SendEncryptedData(int dataLen, unsigned char* ciphered)
 {
-    send(TcpHandler::GetSock, mIV, sizeof(mIV), 0);
-    send(TcpHandler::GetSock, ciphered, , 0);
+    send(TcpHandler::GetSock(), mIV, sizeof(mIV), 0);
+    send(TcpHandler::GetSock(), ciphered, , 0);
 }
