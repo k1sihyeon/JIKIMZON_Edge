@@ -50,6 +50,9 @@ int main()
             std::cout << "class: " << detection.className << ", confidence: " << detection.confidence << std::endl;
         }
 
+        // 디버깅용 화면 출력
+        // capHandler.ShowFrame(inFrame, detections);
+
         // TODO: 결과 파싱, json화, 전송
         
         // h.264 압축
