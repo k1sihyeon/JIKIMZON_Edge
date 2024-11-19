@@ -1,7 +1,5 @@
 #include "encodeHandler.hpp"
 
-EncodeHandler* EncodeHandler::instance = nullptr;
-
 EncodeHandler::EncodeHandler(int width, int height, int bitrate, int fps)
                     : mCodecContext(nullptr), mWidth(width), mHeight(height), mBitrate(bitrate), mFps(fps)
 {

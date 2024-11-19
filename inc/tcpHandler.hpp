@@ -11,17 +11,14 @@
 
 class TcpHandler {
 public:
-    TcpHandler(const TcpHandler&) = delete;
-    TcpHandler& operator=(const TcpHandler&) = delete;
-    
-    static TcpHandler& GetInstance();
+    TcpHandler() = default;
+    ~TcpHandler() = default;
     
     void InitSocket();
     void SendFrame(const std::vector<uchar>& frame);
 
 private:
-    TcpHandler() = default;
-    ~TcpHandler() = default;
+    
     static TcpHandler* sInstance;
 
     int mSockfd;

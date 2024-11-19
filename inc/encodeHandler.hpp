@@ -18,16 +18,7 @@ class EncodeHandler {
 public:
     EncodeHandler(int width, int height, int bitrate, int fps);
     ~EncodeHandler();
-
-    static EncodeHandler* GetInstance(int width, int height, int bitrate, int fps)
-    {
-        if (instance == NULL)
-        {
-            instance = new EncodeHandler(width, height, bitrate, fps);
-        }
-        return instance;
-    }
-
+    
     void encodeFrame(cv::Mat& frame, std::vector<uint8_t>& encodedFrame);
 private:
     void initEncoder();

@@ -18,19 +18,12 @@ namespace object
 class ObjectHandler {
 public:
     ObjectHandler() = default;
-    ObjectHandler(const ObjectHandler&) = delete;
-    ObjectHandler& operator=(const ObjectHandler&) = delete;
-
-    static ObjectHandler& GetInstance();
+    ~ObjectHandler() = default;
 
     void InitModel(const std::string&, const cv::Size &inputShape = {640, 640});
     std::vector<object::Detection> DetectObject(cv::Mat&);
 
 private:
-    //ObjectHandler() = default;
-    ~ObjectHandler() = default;
-    static ObjectHandler* sInstance;
-
     cv::dnn::Net mYoloNet;
     cv::Size mModelInputShape   = {640, 640};
     float mConfidenceThreshold  = 0.25;

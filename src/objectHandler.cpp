@@ -2,17 +2,6 @@
 
 #include <opencv2/opencv.hpp>
 
-ObjectHandler* ObjectHandler::sInstance = nullptr;
-
-ObjectHandler& ObjectHandler::GetInstance()
-{
-    if (sInstance == nullptr)
-    {
-        sInstance = new ObjectHandler;
-    }
-    return *sInstance;
-}
-
 void ObjectHandler::InitModel(const std::string& path, const cv::Size &inputShape)
 {
     mYoloNet = cv::dnn::readNetFromONNX(path);

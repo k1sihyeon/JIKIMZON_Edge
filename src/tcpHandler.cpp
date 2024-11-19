@@ -1,16 +1,5 @@
 #include "tcpHandler.hpp"
 
-TcpHandler* TcpHandler::sInstance = nullptr;
-
-TcpHandler& TcpHandler::GetInstance()
-{
-    if (sInstance == NULL)
-	{
-        sInstance = new TcpHandler;
-    }
-    return *sInstance;
-}
-
 void TcpHandler::InitSocket() {
     mSockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (mSockfd < 0)
