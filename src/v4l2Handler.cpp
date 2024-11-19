@@ -11,12 +11,15 @@ V4L2Handler::~V4L2Handler() {}
 
 void V4L2Handler::StartCapture()
 {
-    cv::VideoCapture cap(0);
+    cv::VideoCapture cap(0, cv::CAP_V4L2);
     
     if (!cap.isOpened()) {
         std::cerr << "cap is not opened" << std::endl;
         exit(EXIT_FAILURE);
     }
+    cap.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
+    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
+    cap.set(cv::CAP_PROP_FPS, 30);
 
     cv::Mat frame;
     // cap >> frame;
