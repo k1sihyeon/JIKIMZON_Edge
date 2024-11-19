@@ -1,7 +1,7 @@
 #ifndef JIKIMZON_CAPTUREHANDLER_H
 #define JIKIMZON_CAPTUREHANDLER_H
 
-#include <iostream>
+#include <opencv2/opencv.hpp>
 
 #define WIDTH   1280
 #define HEIGHT  720
@@ -13,7 +13,6 @@ public:
 
     void InitCapture(int, int, int, int);
     bool GetFrame(cv::Mat&);
-    void StartCapture();
 
 private:
     cv::VideoCapture mCap;

@@ -53,7 +53,7 @@ int main()
         // TODO: 결과 파싱, json화, 전송
         
         // h.264 압축
-        encodeHandler.encodeFrame(inFrame, encodedFrame);
+        encodeHandler.EncodeFrame(inFrame, encodedFrame);
 
         // TODO: 암호화
         
