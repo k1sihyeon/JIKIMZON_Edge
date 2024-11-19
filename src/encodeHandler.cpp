@@ -30,6 +30,7 @@ void EncodeHandler::initEncoder()
 {
     std::cout << "THIS IS INITENCODER" << std::endl;
     const AVCodec* avCodec = avcodec_find_encoder(AV_CODEC_ID_H264);
+
     if (!avCodec)
     {
         perror("Codec not found");
@@ -62,7 +63,7 @@ void EncodeHandler::initEncoder()
     mSwsContext = sws_getContext(mWidth, mHeight, AV_PIX_FMT_BGR24, mWidth, mHeight, AV_PIX_FMT_YUV420P, SWS_BICUBIC, nullptr, nullptr, nullptr);
 }
 
-void EncodeHandler::encodeFrame(cv::Mat& frame, std::vector<uint8_t>& encodedFrame)
+void EncodeHandler::EncodeFrame(cv::Mat& frame, std::vector<uint8_t>& encodedFrame)
 {
     AVFrame* avFrame = av_frame_alloc();
     if (!avFrame)

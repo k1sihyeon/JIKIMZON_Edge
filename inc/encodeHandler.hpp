@@ -10,9 +10,9 @@ extern "C" {
     // int avcodec_open2(AVCodecContext *avctx, AVCodec *codec, AVDictionary **options);
 }
 
+#include <fstream>
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include <fstream>
 
 class EncodeHandler {
 public:
@@ -21,11 +21,20 @@ public:
     
     void encodeFrame(cv::Mat& frame, std::vector<uint8_t>& encodedFrame);
 private:
+    EncodeHandler(int width, int height, int bitrate, int fps) = default;
+    ~EncodeHandler() = default;
+    static EncodeHandler* sInstance;
+
     void initEncoder();
+
     SwsContext* mSwsContext;
     AVCodecContext* mCodecContext;
-    int mWidth, mHeight, mBitrate, mFps;
-    static EncodeHandler* instance;
+
+    int mWidth;
+    int mHeight;
+    int mBitrate
+    int mFps;
+
     std::ofstream mFS;
 };
 
