@@ -20,6 +20,7 @@ private:
     EVP_CIPHER_CTX* mCTX;
 
     void init();
+    void decryptData(uint8_t* encryptedFrame, int encryptedFrameSize, uint8_t* decryptedFrame);
 };
 
 #endif
