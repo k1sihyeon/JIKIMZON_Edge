@@ -19,12 +19,8 @@ public:
     EncodeHandler(int width, int height, int bitrate, int fps);
     ~EncodeHandler();
     
-    void encodeFrame(cv::Mat& frame, std::vector<uint8_t>& encodedFrame);
+    void EncodeFrame(cv::Mat& frame, std::vector<uint8_t>& encodedFrame);
 private:
-    EncodeHandler(int width, int height, int bitrate, int fps) = default;
-    ~EncodeHandler() = default;
-    static EncodeHandler* sInstance;
-
     void initEncoder();
 
     SwsContext* mSwsContext;
@@ -32,7 +28,7 @@ private:
 
     int mWidth;
     int mHeight;
-    int mBitrate
+    int mBitrate;
     int mFps;
 
     std::ofstream mFS;
