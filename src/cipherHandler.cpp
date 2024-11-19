@@ -1,7 +1,9 @@
 #include "cipherHandler.hpp"
-#include "tcpHandler.hpp"
 
 #include <iostream>
+#include <vector>
+#include <sys/socket.h>
+#include <string.h>
 
 CipherHandler::CipherHandler(int sock) : mSock(sock), mCTX(nullptr)
 {
@@ -32,7 +34,7 @@ void CipherHandler::init()
     send(mSock, mKey, sizeof(mKey), 0);
 }
 
-void CipherHandler::EncryptData(const std::vector<uchar>& frame, uint8_t& ciphered)
+void CipherHandler::EncryptData(const std::vector<uint8_t>& frame, uint8_t* ciphered)
 {
     memset(mIV, 0, sizeof(mIV));
     if (RAND_bytes(mIV, sizeof(mIV)))
@@ -55,5 +57,25 @@ void CipherHandler::EncryptData(const std::vector<uchar>& frame, uint8_t& cipher
 void CipherHandler::SendEncryptedData(int dataLen, uint8_t* ciphered)
 {
     send(mSock, mIV, sizeof(mIV), 0);
-    send(mSock, ciphered, , 0);
+    send(mSock, ciphered, dataLen, 0);
+}
+
+void CipherHandler::decryptData(uint8_t* encryptedFrame, int encryptedFrameSize, uint8_t* decryptedFrame)
+{
+    memset(mIV, 0, sizeof(mIV));
+    if (RAND_bytes(mIV, sizeof(mIV)))
+    {
+        std::cerr << "Error: generate iv" << std::endl;
+    }
+
+    if (EVP_EncryptInit_ex(mCTX, EVP_chacha20(), nullptr, mKey, mIV) != 1)
+    {
+        std::cerr << "Error: encrypt init" << std::endl;
+    }
+
+    int len;
+    if (EVP_DecryptUpdate(mCTX, decryptedFrame, &len, encryptedFrame, encryptedFrameSize) != 1)
+    {
+        std::cerr << "Error: encrypt update" << std::endl;
+    }
 }

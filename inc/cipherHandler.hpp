@@ -9,7 +9,7 @@ public:
     CipherHandler(int sock);
     ~CipherHandler();
 
-    void EncryptData(const std::vector<uchar>& frame, uint8_t& ciphered);
+    void EncryptData(const std::vector<uint8_t>& frame, uint8_t* ciphered);
     void SendEncryptedData(int dataLen, uint8_t* ciphered);
     
 private:
