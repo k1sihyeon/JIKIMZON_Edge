@@ -55,7 +55,16 @@ void CipherHandler::EncryptData(std::vector<uint8_t>& src, int size, uint8_t* de
         std::cerr << "Error: encrypt update" << std::endl;
     }
 
-    decryptData(dest, size, dedest, mIV);
+    // decrypt
+    // if (EVP_DecryptInit_ex(mCTX, EVP_chacha20(), nullptr, mKey, mIV) != 1)
+    // {
+    //     std::cerr << "Error: encrypt init" << std::endl;
+    // }
+
+    // if (EVP_DecryptUpdate(mCTX, dedest, &len, dest, size) != 1)
+    // {
+    //     std::cerr << "Error: encrypt update" << std::endl;
+    // }
 }
 
 void CipherHandler::SendEncryptedData(int size, uint8_t* data)
@@ -64,19 +73,11 @@ void CipherHandler::SendEncryptedData(int size, uint8_t* data)
     send(mSock, data, size, 0);
 }
 
-void CipherHandler::decryptData(uint8_t* src, int size, uint8_t* dest, unsigned char* iv)
-{
-    unsigned char _iv[12];
-    memcpy(_iv, iv, sizeof(iv));
-
-    if (EVP_DecryptInit_ex(mCTX, EVP_chacha20(), nullptr, mKey, _iv) != 1)
-    {
-        std::cerr << "Error: encrypt init" << std::endl;
-    }
-
-    int len;
-    if (EVP_DecryptUpdate(mCTX, dest, &len, src, size) != 1)
-    {
-        std::cerr << "Error: encrypt update" << std::endl;
-    }
-}
+// bool CipherHandler::IsEqual(std::vector<uint8_t>& en, uint8_t* de, size_t size) {
+//     for (size_t i = 0; i < size; i++) {
+//         if (en[i] != de[i]) {
+//             return false;
+//         }
+//     }
+//     return true;
+// }
