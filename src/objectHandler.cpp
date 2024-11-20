@@ -10,6 +10,18 @@ void ObjectHandler::InitModel(const std::string& path, const cv::Size &inputShap
 
 std::vector<object::Detection> ObjectHandler::DetectObject(cv::Mat& frame)
 {
+    // 실행 간격 제한
+    // static auto lastExecutionTime = std::chrono::steady_clock::now();
+    // auto currentTime = std::chrono::steady_clock::now();
+    // auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastExecutionTime);
+
+    // if (elapsed.count() < 100) {
+    //     return {};
+    // }
+
+    // lastExecutionTime = currentTime;
+
+
     // 이미지를 모델 입력 크기에 맞추기
     cv::Mat blob = cv::dnn::blobFromImage(frame, 1 / 255.0, mModelInputShape, cv::Scalar(0, 0, 0), true, false);
     
@@ -40,7 +52,8 @@ std::vector<object::Detection> ObjectHandler::DetectObject(cv::Mat& frame)
     {
         float confidence = data[4];
 
-        if (confidence > mConfidenceThreshold) {
+        if (confidence > mConfidenceThreshold)
+        {
             float* classes_scores = data + 5;
 
             cv::Mat scores(1, mObjClasses.size(), CV_32FC1, classes_scores);
