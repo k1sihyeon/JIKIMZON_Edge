@@ -27,7 +27,7 @@ int main()
     EncodeHandler encodeHandler(width, height, bitrate, fps);
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
-    //tcpHandler.InitSocket();
+    tcpHandler.InitSocket();
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
     std::vector<uint8_t> encodedFrame;
@@ -47,12 +47,18 @@ int main()
 
         // 모델 추론
         std::vector<data::Detection> detections;
-        detections = objHandler.DetectObject(inFrame);
+        detections = objHandler.DetectObject(inFrame, timestamp);
         
-        for (const auto& detection : detections)
+        for (auto& detection : detections)
         {
-            std::cout << "class: " << detection.className << ", confidence: " << detection.confidence << std::endl;
-            // 직렬화 후 전송
+            std::vector<uint8_t> buffer;
+            data::SerializeDetection(detection, buffer);
+            
+            data::Detection deserializedDetection;
+            data::DeserializeDetection(buffer, deserializedDetection);
+
+            std::cout << "[before serialization] class: " << detection.className << ", confidence: " << detection.confidence << std::endl;
+            std::cout << "[after serialization] class: " << deserializedDetection.className << ", confidence: " << deserializedDetection.confidence << std::endl;    
         }
 
         // 디버깅용 화면 출력
@@ -61,12 +67,13 @@ int main()
         // TODO: 결과 파싱, json화, 전송
         
         // h.264 압축
-        // encodeHandler.EncodeFrame(inFrame, encodedFrame);
+        encodeHandler.EncodeFrame(inFrame, encodedFrame);
 
         // TODO: 암호화
         
         // tcp 전송
-        // tcpHandler.SendFrame(encodedFrame); 
+        tcpHandler.SendFrame(encodedFrame); 
         // 직렬화 후 전송
+        //uint8_t encryptedFrame[width * height * 3];     // 2764800
     }
 }

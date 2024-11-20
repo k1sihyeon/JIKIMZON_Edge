@@ -8,7 +8,7 @@ void ObjectHandler::InitModel(const std::string& path, const cv::Size &inputShap
     mModelInputShape = inputShape;
 }
 
-std::vector<data::Detection> ObjectHandler::DetectObject(cv::Mat& frame)
+std::vector<data::Detection> ObjectHandler::DetectObject(cv::Mat& frame, std::string& timestamp)
 {
     // 이미지를 모델 입력 크기에 맞추기
     cv::Mat blob = cv::dnn::blobFromImage(frame, 1 / 255.0, mModelInputShape, cv::Scalar(0, 0, 0), true, false);
@@ -40,7 +40,8 @@ std::vector<data::Detection> ObjectHandler::DetectObject(cv::Mat& frame)
     {
         float confidence = data[4];
 
-        if (confidence > mConfidenceThreshold) {
+        if (confidence > mConfidenceThreshold)
+        {
             float* classes_scores = data + 5;
 
             cv::Mat scores(1, mObjClasses.size(), CV_32FC1, classes_scores);
@@ -79,6 +80,7 @@ std::vector<data::Detection> ObjectHandler::DetectObject(cv::Mat& frame)
         int idx = nms_result[i];
 
         data::Detection result;
+        result.timeStamp = timestamp;
         result.classId = class_ids[idx];
         result.confidence = confidences[idx];
         result.className = mObjClasses[result.classId];

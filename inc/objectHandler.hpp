@@ -11,7 +11,7 @@ public:
     ~ObjectHandler() = default;
 
     void InitModel(const std::string&, const cv::Size &inputShape = {640, 640});
-    std::vector<data::Detection> DetectObject(cv::Mat&);
+    std::vector<data::Detection> DetectObject(cv::Mat&, std::string&);
 
 private:
     cv::dnn::Net mYoloNet;
