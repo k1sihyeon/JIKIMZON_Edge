@@ -28,13 +28,13 @@ int main()
     CipherHandler cipherHandler(tcpHandler.GetSock());
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
-    tcpHandler.InitSocket();
-    objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
+    //tcpHandler.InitSocket();
+    //objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
     std::vector<uint8_t> encodedFrame;
     // uint8_t encodedFrame[PATH_MAX];
-    uint8_t encryptedFrame[PATH_MAX];
-    uint8_t decryptedFrame[PATH_MAX];
+    uint8_t encryptedFrame[width * height * 3];     // 2764800
+    uint8_t decryptedFrame[width * height * 3];
 
     while (true) 
     {
@@ -68,10 +68,11 @@ int main()
         
         // 암호화 전송
         cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
-        std::cout << "Encrypted: ";
+        cipherHandler.decryptData(encryptedFrame, sizeof(encryptedFrame), decryptedFrame);
+        std::cout << "decrypted: ";
         for (int i = 0; i < 10; i++)
         {
-            std::cout << encryptedFrame[i] << " ";
+            std::cout << decryptedFrame[i] << " ";
         }
         std:: cout << std::endl;
         // cipherHandler.SendEncryptedData(sizeof(encodedFrame), encryptedFrame);

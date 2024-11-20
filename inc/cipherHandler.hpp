@@ -13,6 +13,8 @@ public:
 
     void EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest);
     void SendEncryptedData(int size, uint8_t* data);
+    void decryptData(uint8_t* src, int size, uint8_t* dest);
+
     
 private:
     int mSock;
@@ -22,7 +24,6 @@ private:
     EVP_CIPHER_CTX* mCTX;
 
     void init();
-    void decryptData(uint8_t* src, int size, uint8_t* dest);
 };
 
 #endif
