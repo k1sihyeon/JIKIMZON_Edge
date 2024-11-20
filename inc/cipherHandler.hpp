@@ -11,11 +11,9 @@ public:
     CipherHandler(int sock);
     ~CipherHandler();
 
-    void EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest);
+    void EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest, uint8_t* dedest);
     void SendEncryptedData(int size, uint8_t* data);
-    void decryptData(uint8_t* src, int size, uint8_t* dest);
 
-    
 private:
     int mSock;
     unsigned char mKey[32];
@@ -24,6 +22,7 @@ private:
     EVP_CIPHER_CTX* mCTX;
 
     void init();
+    void decryptData(uint8_t* src, int size, uint8_t* dest, unsigned char* iv);
 };
 
 #endif

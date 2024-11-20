@@ -36,7 +36,7 @@ void CipherHandler::init()
     send(mSock, mKey, sizeof(mKey), 0);
 }
 
-void CipherHandler::EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest)
+void CipherHandler::EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest, uint8_t* dedest)
 {
     memset(mIV, 0, sizeof(mIV));
     if (!RAND_bytes(mIV, sizeof(mIV)))
@@ -54,6 +54,8 @@ void CipherHandler::EncryptData(std::vector<uint8_t>& src, int size, uint8_t* de
     {
         std::cerr << "Error: encrypt update" << std::endl;
     }
+
+    decryptData(dest, size, dedest, mIV);
 }
 
 void CipherHandler::SendEncryptedData(int size, uint8_t* data)
@@ -62,15 +64,12 @@ void CipherHandler::SendEncryptedData(int size, uint8_t* data)
     send(mSock, data, size, 0);
 }
 
-void CipherHandler::decryptData(uint8_t* src, int size, uint8_t* dest)
+void CipherHandler::decryptData(uint8_t* src, int size, uint8_t* dest, unsigned char* iv)
 {
-    memset(mIV, 0, sizeof(mIV));
-    if (RAND_bytes(mIV, sizeof(mIV)))
-    {
-        std::cerr << "Error: generate iv" << std::endl;
-    }
+    unsigned char _iv[12];
+    memcpy(_iv, iv, sizeof(iv));
 
-    if (EVP_EncryptInit_ex(mCTX, EVP_chacha20(), nullptr, mKey, mIV) != 1)
+    if (EVP_DecryptInit_ex(mCTX, EVP_chacha20(), nullptr, mKey, _iv) != 1)
     {
         std::cerr << "Error: encrypt init" << std::endl;
     }

@@ -67,8 +67,7 @@ int main()
         std:: cout << std::endl;
         
         // 암호화 전송
-        cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
-        cipherHandler.decryptData(encryptedFrame, sizeof(encryptedFrame), decryptedFrame);
+        cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame, decryptedFrame);
         std::cout << "decrypted: ";
         for (int i = 0; i < 10; i++)
         {
