@@ -1,19 +1,9 @@
 #ifndef JIKIMZON_OBJECTHANDLER_H
 #define JIKIMZON_OBJECTHANDLER_H
 
+#include "data.hpp"
+
 #include <opencv2/opencv.hpp>
-
-namespace object
-{
-    struct Detection
-    {
-        int         classId;
-        std::string className;
-        float       confidence;
-        cv::Rect    box;
-    };
-}
-
 
 class ObjectHandler {
 public:
@@ -21,7 +11,7 @@ public:
     ~ObjectHandler() = default;
 
     void InitModel(const std::string&, const cv::Size &inputShape = {640, 640});
-    std::vector<object::Detection> DetectObject(cv::Mat&);
+    std::vector<data::Detection> DetectObject(cv::Mat&);
 
 private:
     cv::dnn::Net mYoloNet;

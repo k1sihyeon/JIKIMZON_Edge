@@ -1,5 +1,11 @@
 #include "tcpHandler.hpp"
 
+#include <iostream>
+#include <chrono>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+
 void TcpHandler::InitSocket()
 {
   mSockfd = socket(AF_INET, SOCK_STREAM, 0);

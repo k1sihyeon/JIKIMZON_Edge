@@ -37,7 +37,7 @@ void CaptureHandler::ShowFrame(cv::Mat& inFrame)
     cv::waitKey(10);
 }
 
-void CaptureHandler::ShowFrame(cv::Mat& inFrame, std::vector<object::Detection>& detections)
+void CaptureHandler::ShowFrame(cv::Mat& inFrame, std::vector<data::Detection>& detections)
 {
     for (const auto& detection : detections)
     {
