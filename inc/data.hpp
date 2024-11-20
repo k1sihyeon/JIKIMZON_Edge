@@ -8,9 +8,8 @@ namespace data
 {
     struct Frame
     {
-        std::string     timestamp;          // 타임스탬프               // 19
-        unsigned char   *iv;               // initial vector            // 12
-        uint8_t         *encryptedFrame;   // 암호화된 프레임 데이터   // 2764800 = width * height * channels(3)
+        std::string     timestamp;          // 타임스탬프                // 19
+        uint8_t         *encryptedFrame;    // 암호화된 프레임 데이터    // 2764800 = width * height * channels(3)
     };
 
     struct Detection
@@ -32,7 +31,7 @@ namespace data
     std::string GetCurrentTime();
     std::string PadFixedLength(std::string& str, int length);
     
-    void SerializeFrame(std::string timestamp, unsigned char *iv, uint8_t *encryptedFrame, std::vector<uint8_t>& buffer);
+    void SerializeFrame(std::string timestamp, uint8_t *encryptedFrame, std::vector<uint8_t>& buffer);
     void SerializeFrame(data::Frame& frameData, std::vector<uint8_t>& buffer);
     void DeserializeFrame(std::vector<uint8_t>& buffer, data::Frame& frameData);
 

@@ -32,15 +32,12 @@ std::string data::PadFixedLength(std::string& str, int length = data::CLASSNAME_
     }
 }
 
-void data::SerializeFrame(std::string timestamp, unsigned char *iv, uint8_t *encryptedFrame, std::vector<uint8_t>& buffer)
+void data::SerializeFrame(std::string timestamp, uint8_t *encryptedFrame, std::vector<uint8_t>& buffer)
 {
     buffer.clear();
 
     // timestamp
     buffer.insert(buffer.end(), timestamp.begin(), timestamp.end());
-
-    // initial vector for encryption
-    buffer.insert(buffer.end(), iv, iv + data::IV_SIZE);
 
     // encryptedFrame
     buffer.insert(buffer.end(), encryptedFrame, encryptedFrame + data::FRAME_SIZE);
@@ -48,7 +45,7 @@ void data::SerializeFrame(std::string timestamp, unsigned char *iv, uint8_t *enc
 
 void data::SerializeFrame(data::Frame& frameData, std::vector<uint8_t>& buffer)
 {
-    return SerializeFrame(frameData.timestamp, frameData.iv, frameData.encryptedFrame, buffer);
+    return SerializeFrame(frameData.timestamp, frameData.encryptedFrame, buffer);
 }
 
 void data::DeserializeFrame(std::vector<uint8_t>& buffer, data::Frame& frameData)
@@ -57,10 +54,6 @@ void data::DeserializeFrame(std::vector<uint8_t>& buffer, data::Frame& frameData
 
     // timestamp
     frameData.timestamp = std::string(buffer.begin(), buffer.begin() + offset);
-
-    // initial vector for encryption
-    std::copy(buffer.begin() + offset, buffer.begin() + offset + data::IV_SIZE, frameData.iv);
-    offset += data::IV_SIZE;
 
     // encryptedFrame
     std::copy(buffer.begin() + offset, buffer.end(), frameData.encryptedFrame);
