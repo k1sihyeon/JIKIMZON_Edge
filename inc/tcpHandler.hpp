@@ -16,12 +16,12 @@ public:
     ~TcpHandler() = default;
     
     void InitSocket();
-    void SendFrame(const std::vector<uchar>& frame);
+    void SendData(const unsigned char* ci, size_t size);
+    void SendData(std::vector<uint8_t>& frame);
+    
 
 private:
     
-    static TcpHandler* sInstance;
-
     int mSockfd;
     int mClientSock;
     struct sockaddr_in mServerAddr;

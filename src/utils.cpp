@@ -1,0 +1,24 @@
+#include "utils.hpp"
+
+#include <chrono>
+#include <iomanip>
+
+std::string Utils::GetCurrentTime()
+{
+    auto now = std::chrono::system_clock::now();
+
+    std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+    std::tm tm;
+    localtime_r(&currentTime, &tm);
+
+    auto duration = now.time_since_epoch();
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration) % 1'000;
+    
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%Y%m%d_%H%M%S");
+    oss << "." << std::setfill('0') << std::setw(3) << milliseconds.count();
+
+    // format: YYYYMMDD_HHMMSS.sss
+
+    return oss.str();
+}

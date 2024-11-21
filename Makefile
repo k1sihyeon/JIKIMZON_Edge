@@ -2,7 +2,7 @@
 CXX = g++
 
 # Compiler flags
-CXXFLAGS = -I./inc `pkg-config --cflags --libs opencv4 libavcodec libavformat libavutil libswscale` -Wall -std=c++11
+CXXFLAGS = -I./inc `pkg-config --cflags --libs opencv4 libavcodec libavformat libavutil libswscale libcrypto openssl` -Wall -std=c++11
 
 # Source and object files
 SRC_DIR = src

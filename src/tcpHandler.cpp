@@ -39,7 +39,7 @@ void TcpHandler::InitSocket()
 	printf("Client connected!\n");
 }
 
-void TcpHandler::SendFrame(const std::vector<uchar>& frame)
+void TcpHandler::SendData(const unsigned char* ci, size_t size)
 {
     if (mClientSock < 0)
     {
@@ -47,8 +47,22 @@ void TcpHandler::SendFrame(const std::vector<uchar>& frame)
         exit(EXIT_FAILURE);
     }
 
-    if (send(mClientSock, frame.data(), frame.size(), 0) < 0)
+    if (send(mClientSock, ci, (size_t)12UL, 0) < 0)
     {
-        perror("send");
+        perror("send iv");
+	}
+}
+
+void TcpHandler::SendData(std::vector<uint8_t>& frame)
+{
+    if (mClientSock < 0)
+    {
+        std::cerr << "not valid client sock" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+	if (send(mClientSock, frame.data(), frame.size(), 0) < 0)
+    {
+        perror("send frame");
     }
 }

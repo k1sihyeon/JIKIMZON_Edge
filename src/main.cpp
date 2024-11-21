@@ -2,10 +2,13 @@
 #include "tcpHandler.hpp"
 #include "encodeHandler.hpp"
 #include "objectHandler.hpp"
+
 #include "data.hpp"
+#include "cipherHandler.hpp"
 
 #include <unistd.h>
 #include <limits.h>
+#include <nlohmann/json.hpp>
 
 #include <opencv2/opencv.hpp>
 
@@ -21,16 +24,20 @@ int main()
     getcwd(buf, PATH_MAX);
     std::string path(buf);
 
+    Utils utils;
     CaptureHandler capHandler;
     TcpHandler tcpHandler;
     ObjectHandler objHandler;
     EncodeHandler encodeHandler(width, height, bitrate, fps);
+    CipherHandler cipherHandler;
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
     tcpHandler.InitSocket();
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
     std::vector<uint8_t> encodedFrame;
+    std::vector<uint8_t> encryptedFrame;
+    std::vector<uint8_t> decryptedFrame;
 
     while (true) 
     {
@@ -44,36 +51,37 @@ int main()
         std::cout << "===== timestamp: " << timestamp << " =====" << std::endl;
 
         // TODO: 전처리
-
-        // 모델 추론
-        std::vector<data::Detection> detections;
-        detections = objHandler.DetectObject(inFrame, timestamp);
         
-        for (auto& detection : detections)
-        {
-            std::vector<uint8_t> buffer;
-            data::SerializeDetection(detection, buffer);
-            
-            data::Detection deserializedDetection;
-            data::DeserializeDetection(buffer, deserializedDetection);
+        // 모델 추론
+        object::Detection detections;
+        detections = objHandler.DetectObject(inFrame);
 
-            std::cout << "[before serialization] class: " << detection.className << ", confidence: " << detection.confidence << std::endl;
-            std::cout << "[after serialization] class: " << deserializedDetection.className << ", confidence: " << deserializedDetection.confidence << std::endl;    
-        }
 
         // 디버깅용 화면 출력
         capHandler.ShowFrame(inFrame, detections);
 
+
         // TODO: 결과 파싱, json화, 전송
-        
+        nlohmann::json json = objHandler.CreateJson(detections);
+
         // h.264 압축
         encodeHandler.EncodeFrame(inFrame, encodedFrame);
-
-        // TODO: 암호화
         
+        // 암호화 && tcp 전송
+        auto key = cipherHandler.Init();
+
+        // tcpHandler.SendData(key, (size_t)32UL); 
+
+        // cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame, decryptedFrame);
+        auto iv = cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
+        tcpHandler.SendData(iv, (size_t)12UL); 
+
+        // if (cipherHandler.isEqual(encodedFrame, decryptedFrame, sizeof(encodedFrame)))
+        // {
+        //     std::cout<<"true";
+        // }
+
         // tcp 전송
-        tcpHandler.SendFrame(encodedFrame); 
-        // 직렬화 후 전송
-        //uint8_t encryptedFrame[width * height * 3];     // 2764800
+        tcpHandler.SendData(encryptedFrame); 
     }
 }

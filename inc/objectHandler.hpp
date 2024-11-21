@@ -4,6 +4,22 @@
 #include "data.hpp"
 
 #include <opencv2/opencv.hpp>
+#include <nlohmann/json.hpp>
+
+namespace object
+{
+    struct Obj
+    {
+        std::string className;
+        cv::Rect    box;
+    };
+
+    struct Detection
+    {
+        std::string timeStamp;
+        std::vector<Obj> vObj;
+    };
+}
 
 class ObjectHandler {
 public:
@@ -11,7 +27,9 @@ public:
     ~ObjectHandler() = default;
 
     void InitModel(const std::string&, const cv::Size &inputShape = {640, 640});
-    std::vector<data::Detection> DetectObject(cv::Mat&, std::string&);
+
+    object::Detection DetectObject(cv::Mat&);
+    nlohmann::json CreateJson(object::Detection detection);
 
 private:
     cv::dnn::Net mYoloNet;
