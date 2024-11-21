@@ -15,7 +15,7 @@ public:
     ~TcpHandler() = default;
     
     void InitSocket();
-    void SendFrame(const std::vector<uchar>& frame);
+    void SendFrame(unsigned char* iv, const uint8_t* frame, size_t size);
     int GetSock();
 
 private:

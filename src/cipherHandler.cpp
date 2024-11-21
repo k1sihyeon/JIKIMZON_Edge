@@ -36,7 +36,8 @@ void CipherHandler::init()
     send(mSock, mKey, sizeof(mKey), 0);
 }
 
-void CipherHandler::EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest, uint8_t* dedest)
+// unsigned char* CipherHandler::EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest, uint8_t* dedest)
+unsigned char* CipherHandler::EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest)
 {
     memset(mIV, 0, sizeof(mIV));
     if (!RAND_bytes(mIV, sizeof(mIV)))
@@ -65,12 +66,8 @@ void CipherHandler::EncryptData(std::vector<uint8_t>& src, int size, uint8_t* de
     // {
     //     std::cerr << "Error: encrypt update" << std::endl;
     // }
-}
 
-void CipherHandler::SendEncryptedData(int size, uint8_t* data)
-{
-    send(mSock, mIV, sizeof(mIV), 0);
-    send(mSock, data, size, 0);
+    return mIV;
 }
 
 // bool CipherHandler::IsEqual(std::vector<uint8_t>& en, uint8_t* de, size_t size) {

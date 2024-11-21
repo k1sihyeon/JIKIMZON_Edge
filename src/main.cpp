@@ -60,17 +60,15 @@ int main()
         encodeHandler.EncodeFrame(inFrame, encodedFrame);
         
         // 암호화
-        cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame, decryptedFrame);
+        // cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame, decryptedFrame);
+        auto iv = cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
 
         // if (cipherHandler.isEqual(encodedFrame, decryptedFrame, sizeof(encodedFrame)))
         // {
         //     std::cout<<"true";
         // }
 
-        // 전송
-        cipherHandler.SendEncryptedData(sizeof(encodedFrame), encryptedFrame);
-
         // tcp 전송
-        // tcpHandler.SendFrame(encodedFrame); 
+        tcpHandler.SendFrame(iv, encryptedFrame, sizeof(encryptedFrame)); 
     }
 }

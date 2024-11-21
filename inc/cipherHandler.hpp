@@ -11,8 +11,8 @@ public:
     CipherHandler(int sock);
     ~CipherHandler();
 
-    void EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest, uint8_t* dedest);
-    void SendEncryptedData(int size, uint8_t* data);
+    // unsigned char* EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest, uint8_t* dedest);
+    unsigned char* EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest);
 
     // bool IsEqual(std::vector<uint8_t>& en, uint8_t* de, size_t size);
 
