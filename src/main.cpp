@@ -32,8 +32,8 @@ int main()
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
     std::vector<uint8_t> encodedFrame;
-    uint8_t encryptedFrame[width * height * 3];     // 2764800
-    uint8_t decryptedFrame[width * height * 3];
+    std::vector<uint8_t> encryptedFrame;
+    std::vector<uint8_t> decryptedFrame;
 
     while (true) 
     {
@@ -61,11 +61,11 @@ int main()
         
         // 암호화 && tcp 전송
         auto key = cipherHandler.Init();
-        tcpHandler.SendFrame(key, (size_t)32UL); 
+        // tcpHandler.SendData(key, (size_t)32UL); 
 
         // cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame, decryptedFrame);
         auto iv = cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
-        tcpHandler.SendFrame(iv, (size_t)12UL); 
+        tcpHandler.SendData(iv, (size_t)12UL); 
 
         // if (cipherHandler.isEqual(encodedFrame, decryptedFrame, sizeof(encodedFrame)))
         // {
@@ -73,6 +73,6 @@ int main()
         // }
 
         // tcp 전송
-        tcpHandler.SendFrame(encryptedFrame, sizeof(encryptedFrame)); 
+        tcpHandler.SendData(encryptedFrame); 
     }
 }
