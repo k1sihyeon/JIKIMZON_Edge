@@ -2,6 +2,7 @@
 #include "tcpHandler.hpp"
 #include "encodeHandler.hpp"
 #include "objectHandler.hpp"
+#include "cipherHandler.hpp"
 
 #include <unistd.h>
 #include <limits.h>
@@ -20,16 +21,20 @@ int main()
     getcwd(buf, PATH_MAX);
     std::string path(buf);
 
+    Utils utils;
     CaptureHandler capHandler;
     TcpHandler tcpHandler;
     ObjectHandler objHandler;
     EncodeHandler encodeHandler(width, height, bitrate, fps);
+    CipherHandler cipherHandler;
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
     tcpHandler.InitSocket();
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
     std::vector<uint8_t> encodedFrame;
+    uint8_t encryptedFrame[width * height * 3];     // 2764800
+    uint8_t decryptedFrame[width * height * 3];
 
     while (true) 
     {
@@ -50,14 +55,26 @@ int main()
             std::cout << "class: " << detection.className << ", confidence: " << detection.confidence << std::endl;
         }
 
-        // TODO: 결과 파싱, json화, 전송
+        // 결과 전송
+        // tcpHandler.SendFrame(detections, sizeof(detections));
         
         // h.264 압축
         encodeHandler.EncodeFrame(inFrame, encodedFrame);
-
-        // TODO: 암호화
         
+        // 암호화 && tcp 전송
+        auto key = cipherHandler.Init();
+        tcpHandler.SendFrame(key, (size_t)32UL); 
+
+        // cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame, decryptedFrame);
+        auto iv = cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
+        tcpHandler.SendFrame(iv, (size_t)12UL); 
+
+        // if (cipherHandler.isEqual(encodedFrame, decryptedFrame, sizeof(encodedFrame)))
+        // {
+        //     std::cout<<"true";
+        // }
+
         // tcp 전송
-        tcpHandler.SendFrame(encodedFrame); 
+        tcpHandler.SendFrame(encryptedFrame, sizeof(encryptedFrame)); 
     }
 }
