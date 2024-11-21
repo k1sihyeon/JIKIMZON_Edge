@@ -6,6 +6,7 @@
 
 #include <unistd.h>
 #include <limits.h>
+#include <nlohmann/json.hpp>
 
 #include <opencv2/opencv.hpp>
 
@@ -33,8 +34,8 @@ int main()
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
     std::vector<uint8_t> encodedFrame;
-    uint8_t encryptedFrame[width * height * 3];     // 2764800
-    uint8_t decryptedFrame[width * height * 3];
+    std::vector<uint8_t> encryptedFrame;
+    std::vector<uint8_t> decryptedFrame;
 
     while (true) 
     {
@@ -45,29 +46,29 @@ int main()
         }
 
         // TODO: 전처리
-
+        
         // 모델 추론
-        std::vector<object::Detection> detections;
+        object::Detection detections;
         detections = objHandler.DetectObject(inFrame);
-        
-        for (const auto& detection : detections)
-        {
-            std::cout << "class: " << detection.className << ", confidence: " << detection.confidence << std::endl;
-        }
 
-        // 결과 전송
-        // tcpHandler.SendFrame(detections, sizeof(detections));
-        
+        // 디버깅용 화면 출력
+        // capHandler.ShowFrame(inFrame, detections);
+
+
+        // TODO: 결과 파싱, json화, 전송
+        nlohmann::json json = objHandler.CreateJson(detections);
+
         // h.264 압축
         encodeHandler.EncodeFrame(inFrame, encodedFrame);
         
         // 암호화 && tcp 전송
         auto key = cipherHandler.Init();
-        tcpHandler.SendFrame(key, (size_t)32UL); 
+
+        // tcpHandler.SendData(key, (size_t)32UL); 
 
         // cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame, decryptedFrame);
         auto iv = cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
-        tcpHandler.SendFrame(iv, (size_t)12UL); 
+        tcpHandler.SendData(iv, (size_t)12UL); 
 
         // if (cipherHandler.isEqual(encodedFrame, decryptedFrame, sizeof(encodedFrame)))
         // {
@@ -75,6 +76,6 @@ int main()
         // }
 
         // tcp 전송
-        tcpHandler.SendFrame(encryptedFrame, sizeof(encryptedFrame)); 
+        tcpHandler.SendData(encryptedFrame); 
     }
 }
