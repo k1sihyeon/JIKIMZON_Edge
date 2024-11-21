@@ -5,6 +5,7 @@
 
 #include <unistd.h>
 #include <limits.h>
+#include <nlohmann/json.hpp>
 
 #include <opencv2/opencv.hpp>
 
@@ -40,7 +41,7 @@ int main()
         }
 
         // TODO: 전처리
-
+        
         // 모델 추론
         object::Detection detections;
         detections = objHandler.DetectObject(inFrame);
@@ -49,7 +50,8 @@ int main()
         // capHandler.ShowFrame(inFrame, detections);
 
         // TODO: 결과 파싱, json화, 전송
-        
+        nlohmann::json json = objHandler.CreateJson(detections);
+
         // h.264 압축
         encodeHandler.EncodeFrame(inFrame, encodedFrame);
 

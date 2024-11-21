@@ -91,3 +91,25 @@ object::Detection ObjectHandler::DetectObject(cv::Mat& frame)
 
     return detection;
 }
+
+nlohmann::json ObjectHandler::CreateJson(object::Detection detection)
+{
+    nlohmann::json json;
+
+
+    json["timestamp"].push_back(detection.timeStamp);
+
+    for (auto i: detection.vObj)
+    {
+        nlohmann::json obj;
+        obj["className"].push_back(i.className);
+        obj["x"].push_back(i.box.x);
+        obj["y"].push_back(i.box.y);
+        obj["width"].push_back(i.box.width);
+        obj["height"].push_back(i.box.height);
+
+        json["object"].push_back(obj);
+    }
+    
+    return json;
+}

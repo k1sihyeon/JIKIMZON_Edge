@@ -2,6 +2,7 @@
 #define JIKIMZON_OBJECTHANDLER_H
 
 #include <opencv2/opencv.hpp>
+#include <nlohmann/json.hpp>
 
 namespace object
 {
@@ -25,6 +26,7 @@ public:
 
     void InitModel(const std::string&, const cv::Size &inputShape = {640, 640});
     object::Detection DetectObject(cv::Mat&);
+    nlohmann::json CreateJson(object::Detection detection);
 
 private:
     cv::dnn::Net mYoloNet;
