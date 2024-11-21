@@ -9,7 +9,8 @@
 
 #define PORT    12345
 
-class TcpHandler {
+class TcpHandler
+{
 public:
     TcpHandler() = default;
     ~TcpHandler() = default;

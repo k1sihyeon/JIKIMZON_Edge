@@ -40,7 +40,8 @@ object::Detection ObjectHandler::DetectObject(cv::Mat& frame)
     {
         float confidence = data[4];
 
-        if (confidence > mConfidenceThreshold) {
+        if (confidence > mConfidenceThreshold)
+        {
             float* classes_scores = data + 5;
 
             cv::Mat scores(1, mObjClasses.size(), CV_32FC1, classes_scores);
