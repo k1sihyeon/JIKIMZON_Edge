@@ -13,7 +13,7 @@ namespace object
 
     struct Detection
     {
-        // std::string timeStamp;
+        std::string timeStamp;
         std::vector<Obj> vObj;
     };
 }
