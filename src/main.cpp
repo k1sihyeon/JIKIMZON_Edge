@@ -22,6 +22,7 @@ int main()
     getcwd(buf, PATH_MAX);
     std::string path(buf);
 
+    Utils utils;
     CaptureHandler capHandler;
     TcpHandler tcpHandler;
     ObjectHandler objHandler;
@@ -53,6 +54,7 @@ int main()
         // 디버깅용 화면 출력
         // capHandler.ShowFrame(inFrame, detections);
 
+
         // TODO: 결과 파싱, json화, 전송
         nlohmann::json json = objHandler.CreateJson(detections);
 
@@ -61,6 +63,7 @@ int main()
         
         // 암호화 && tcp 전송
         auto key = cipherHandler.Init();
+
         // tcpHandler.SendData(key, (size_t)32UL); 
 
         // cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame, decryptedFrame);
