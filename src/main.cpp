@@ -42,13 +42,8 @@ int main()
         // TODO: 전처리
 
         // 모델 추론
-        std::vector<object::Detection> detections;
+        object::Detection detections;
         detections = objHandler.DetectObject(inFrame);
-        
-        for (const auto& detection : detections)
-        {
-            std::cout << "class: " << detection.className << ", confidence: " << detection.confidence << std::endl;
-        }
 
         // 디버깅용 화면 출력
         // capHandler.ShowFrame(inFrame, detections);
