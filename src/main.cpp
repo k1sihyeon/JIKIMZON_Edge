@@ -25,7 +25,7 @@ int main()
     TcpHandler tcpHandler;
     ObjectHandler objHandler;
     EncodeHandler encodeHandler(width, height, bitrate, fps);
-    CipherHandler cipherHandler(tcpHandler.GetSock());
+    CipherHandler cipherHandler;
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
     tcpHandler.InitSocket();
@@ -59,9 +59,13 @@ int main()
         // h.264 압축
         encodeHandler.EncodeFrame(inFrame, encodedFrame);
         
-        // 암호화
+        // 암호화 && tcp 전송
+        auto key = cipherHandler.Init();
+        tcpHandler.SendFrame(key, (size_t)32UL); 
+
         // cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame, decryptedFrame);
         auto iv = cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
+        tcpHandler.SendFrame(iv, (size_t)12UL); 
 
         // if (cipherHandler.isEqual(encodedFrame, decryptedFrame, sizeof(encodedFrame)))
         // {
@@ -69,6 +73,6 @@ int main()
         // }
 
         // tcp 전송
-        tcpHandler.SendFrame(iv, encryptedFrame, sizeof(encryptedFrame)); 
+        tcpHandler.SendFrame(encryptedFrame, sizeof(encryptedFrame)); 
     }
 }

@@ -15,8 +15,9 @@ public:
     ~TcpHandler() = default;
     
     void InitSocket();
-    void SendFrame(unsigned char* iv, const uint8_t* frame, size_t size);
-    int GetSock();
+    void SendFrame(const unsigned char* ci, size_t size);
+    void SendFrame(const uint8_t* frame, size_t size);
+    
 
 private:
     

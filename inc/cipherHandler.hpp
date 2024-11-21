@@ -8,8 +8,10 @@
 
 class CipherHandler {
 public:
-    CipherHandler(int sock);
+    CipherHandler();
     ~CipherHandler();
+
+    unsigned char* Init();
 
     // unsigned char* EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest, uint8_t* dedest);
     unsigned char* EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest);
@@ -17,13 +19,10 @@ public:
     // bool IsEqual(std::vector<uint8_t>& en, uint8_t* de, size_t size);
 
 private:
-    int mSock;
     unsigned char mKey[32];
     unsigned char mIV[12];
 
     EVP_CIPHER_CTX* mCTX;
-
-    void init();
 };
 
 #endif

@@ -5,10 +5,7 @@
 #include <sys/socket.h>
 #include <string.h>
 
-CipherHandler::CipherHandler(int sock) : mSock(sock), mCTX(nullptr)
-{
-    init();
-}
+CipherHandler::CipherHandler() : mCTX(nullptr) {}
 
 CipherHandler::~CipherHandler()
 {
@@ -18,7 +15,7 @@ CipherHandler::~CipherHandler()
     }
 }
 
-void CipherHandler::init()
+unsigned char* CipherHandler::Init()
 {
     OpenSSL_add_all_algorithms();
 
@@ -33,7 +30,7 @@ void CipherHandler::init()
         std::cerr << "Error: generate key" << std::endl;
     }
 
-    send(mSock, mKey, sizeof(mKey), 0);
+    return mKey;
 }
 
 // unsigned char* CipherHandler::EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest, uint8_t* dedest)
