@@ -8,7 +8,7 @@ void ObjectHandler::InitModel(const std::string& path, const cv::Size &inputShap
     mModelInputShape = inputShape;
 }
 
-std::vector<object::Detection> ObjectHandler::DetectObject(cv::Mat& frame)
+object::Detection ObjectHandler::DetectObject(cv::Mat& frame)
 {
     // 이미지를 모델 입력 크기에 맞추기
     cv::Mat blob = cv::dnn::blobFromImage(frame, 1 / 255.0, mModelInputShape, cv::Scalar(0, 0, 0), true, false);
@@ -73,19 +73,21 @@ std::vector<object::Detection> ObjectHandler::DetectObject(cv::Mat& frame)
     std::vector<int> nms_result;
     cv::dnn::NMSBoxes(boxes, confidences, mScoreThreshold, mNMSThreshold, nms_result);
 
-    std::vector<object::Detection> detections;
+    std::vector<object::Obj> vObj;
     for (unsigned long i = 0; i < nms_result.size(); ++i)
     {
         int idx = nms_result[i];
 
-        object::Detection result;
-        result.classId = class_ids[idx];
-        result.confidence = confidences[idx];
-        result.className = mObjClasses[result.classId];
-        result.box = boxes[idx];
+        object::Obj obj;
+        obj.className = mObjClasses[class_ids[idx]];
+        obj.box = boxes[idx];
 
-        detections.push_back(result);
+        vObj.push_back(obj);
     }
 
-    return detections;
+    object::Detection detection;
+    // detection.timeStamp
+    detection.vObj = vObj;
+
+    return detection;
 }

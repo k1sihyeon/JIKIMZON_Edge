@@ -5,15 +5,18 @@
 
 namespace object
 {
-    struct Detection
+    struct Obj
     {
-        int         classId;
         std::string className;
-        float       confidence;
         cv::Rect    box;
     };
-}
 
+    struct Detection
+    {
+        // std::string timeStamp;
+        std::vector<Obj> vObj;
+    };
+}
 
 class ObjectHandler {
 public:
@@ -21,7 +24,7 @@ public:
     ~ObjectHandler() = default;
 
     void InitModel(const std::string&, const cv::Size &inputShape = {640, 640});
-    std::vector<object::Detection> DetectObject(cv::Mat&);
+    object::Detection DetectObject(cv::Mat&);
 
 private:
     cv::dnn::Net mYoloNet;
