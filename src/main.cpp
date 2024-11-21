@@ -6,6 +6,7 @@
 
 #include <unistd.h>
 #include <limits.h>
+#include <nlohmann/json.hpp>
 
 #include <opencv2/opencv.hpp>
 
@@ -44,18 +45,17 @@ int main()
         }
 
         // TODO: 전처리
-
-        // 모델 추론
-        std::vector<object::Detection> detections;
-        detections = objHandler.DetectObject(inFrame);
         
-        for (const auto& detection : detections)
-        {
-            std::cout << "class: " << detection.className << ", confidence: " << detection.confidence << std::endl;
-        }
+        // 모델 추론
+        object::Detection detections;
+        detections = objHandler.DetectObject(inFrame);
+
+        // 디버깅용 화면 출력
+        // capHandler.ShowFrame(inFrame, detections);
 
         // TODO: 결과 파싱, json화, 전송
-        
+        nlohmann::json json = objHandler.CreateJson(detections);
+
         // h.264 압축
         encodeHandler.EncodeFrame(inFrame, encodedFrame);
         
