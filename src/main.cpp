@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <limits.h>
 #include <nlohmann/json.hpp>
-
 #include <opencv2/opencv.hpp>
 
 int main()

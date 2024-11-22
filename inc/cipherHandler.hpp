@@ -12,10 +12,8 @@ public:
     ~CipherHandler();
 
     unsigned char* Init();
-
     // unsigned char* EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest, std::vector<uint8_t>& dedest);
     unsigned char* EncryptData(std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest);
-
     // bool IsEqual(std::vector<uint8_t>& en, uint8_t* de, size_t size);
 
 private:
