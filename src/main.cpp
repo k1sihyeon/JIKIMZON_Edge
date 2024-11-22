@@ -11,10 +11,10 @@
 
 int main()
 {
-    const int width = 1280;
-    const int height = 720;
-    const int fps = 30;
-    const int bitrate = 1000000;
+    const int width     = 1280;
+    const int height    = 720;
+    const int fps       = 15;
+    const int bitrate   = 1000000;
 
     // Get current working directory
     char buf[PATH_MAX];
@@ -33,7 +33,6 @@ int main()
 
     std::vector<uint8_t> encodedFrame;
     std::vector<uint8_t> encryptedFrame;
-    std::vector<uint8_t> decryptedFrame;
     unsigned char iv[12];
 
     while (true) 
@@ -56,14 +55,9 @@ int main()
         encodeHandler.EncodeFrame(inFrame, encodedFrame);
         
         // 암호화 && tcp 전송
-        // cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame, decryptedFrame);
-        cipherHandler.EncryptData(iv, encodedFrame, sizeof(encodedFrame), encryptedFrame);
+        encryptedFrame.resize(encodedFrame.size());
+        cipherHandler.EncryptData(iv, encodedFrame, encodedFrame.size(), encryptedFrame);
         tcpHandler.SendData(iv, (size_t)12UL); 
-
-        // if (cipherHandler.isEqual(encodedFrame, decryptedFrame, sizeof(encodedFrame)))
-        // {
-        //     std::cout<<"true";
-        // }
 
         // tcp 전송
         tcpHandler.SendData(encryptedFrame); 
