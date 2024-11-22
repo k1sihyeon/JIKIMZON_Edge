@@ -2,6 +2,9 @@
 #include "tcpHandler.hpp"
 #include "encodeHandler.hpp"
 #include "objectHandler.hpp"
+#include "cipherHandler.hpp"
+#include "data.hpp"
+#include "utils.hpp"
 
 #include <unistd.h>
 #include <limits.h>
@@ -32,6 +35,8 @@ int main()
 
     std::vector<uint8_t> encodedFrame;
 
+    unsigned int frameId = 0;
+
     while (true) 
     {
         cv::Mat inFrame;
@@ -39,6 +44,9 @@ int main()
         {
             continue;
         }
+
+        std::string timestamp = utils.GetCurrentTime();
+        //std::cout << "===== timestamp: " << timestamp << " =====" << std::endl;
 
         // TODO: 전처리
         
@@ -57,7 +65,22 @@ int main()
 
         // TODO: 암호화
         
+        // 암호화 && tcp 전송
+        auto key = cipherHandler.Init();
+        // tcpHandler.SendData(key, (size_t)32UL); 
+
+        // cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame, decryptedFrame);
+        auto iv = cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
+        tcpHandler.SendData(iv, (size_t)12UL);
+
+        // if (cipherHandler.isEqual(encodedFrame, decryptedFrame, sizeof(encodedFrame)))
+        // {
+        //     std::cout<<"true";
+        // }
+
         // tcp 전송
-        tcpHandler.SendFrame(encodedFrame); 
+        tcpHandler.SendData(encryptedFrame);
+
+        frameId += 1;
     }
 }
