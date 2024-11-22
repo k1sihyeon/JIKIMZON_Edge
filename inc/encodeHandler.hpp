@@ -16,18 +16,11 @@ extern "C" {
 
 class EncodeHandler {
 public:
-    EncodeHandler(const EncodeHandler&) = delete;
-    EncodeHandler& operator=(const EncodeHandler&) = delete;
-
-    static EncodeHandler& GetInstance();
-
+    EncodeHandler(int width, int height, int bitrate, int fps);
+    ~EncodeHandler();
+    
     void EncodeFrame(cv::Mat& frame, std::vector<uint8_t>& encodedFrame);
-
 private:
-    EncodeHandler(int width, int height, int bitrate, int fps) = default;
-    ~EncodeHandler() = default;
-    static EncodeHandler* sInstance;
-
     void initEncoder();
 
     SwsContext* mSwsContext;
@@ -35,7 +28,7 @@ private:
 
     int mWidth;
     int mHeight;
-    int mBitrate
+    int mBitrate;
     int mFps;
 
     std::ofstream mFS;
