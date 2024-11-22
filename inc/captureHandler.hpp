@@ -1,10 +1,9 @@
 #ifndef JIKIMZON_CAPTUREHANDLER_H
 #define JIKIMZON_CAPTUREHANDLER_H
 
-#include <opencv2/opencv.hpp>
+#include "data.hpp"
 
-#define WIDTH   1280
-#define HEIGHT  720
+#include <opencv2/opencv.hpp>
 
 class CaptureHandler {
 public:
@@ -13,10 +12,11 @@ public:
 
     void InitCapture(int, int, int, int);
     bool GetFrame(cv::Mat&);
+    void ShowFrame(cv::Mat&);
+    void ShowFrame(cv::Mat&, std::vector<data::Detection>&);
 
 private:
     cv::VideoCapture mCap;
-    
 };
 
 #endif

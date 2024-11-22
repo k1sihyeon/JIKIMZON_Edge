@@ -60,6 +60,6 @@ int main()
         tcpHandler.SendData(iv, (size_t)12UL); 
 
         // tcp 전송
-        tcpHandler.SendData(encryptedFrame); 
+        // tcpHandler.SendData(encryptedFrame); 
     }
 }

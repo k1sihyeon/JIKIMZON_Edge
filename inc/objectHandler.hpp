@@ -1,19 +1,25 @@
 #ifndef JIKIMZON_OBJECTHANDLER_H
 #define JIKIMZON_OBJECTHANDLER_H
 
+#include "data.hpp"
+
 #include <opencv2/opencv.hpp>
+#include <nlohmann/json.hpp>
 
 namespace object
 {
-    struct Detection
+    struct Obj
     {
-        int         classId;
         std::string className;
-        float       confidence;
         cv::Rect    box;
     };
-}
 
+    struct Detection
+    {
+        std::string timeStamp;
+        std::vector<Obj> vObj;
+    };
+}
 
 class ObjectHandler {
 public:
@@ -21,13 +27,15 @@ public:
     ~ObjectHandler() = default;
 
     void InitModel(const std::string&, const cv::Size &inputShape = {640, 640});
-    std::vector<object::Detection> DetectObject(cv::Mat&);
+
+    object::Detection DetectObject(cv::Mat&);
+    nlohmann::json CreateJson(object::Detection detection);
 
 private:
     cv::dnn::Net mYoloNet;
     cv::Size mModelInputShape   = {640, 640};
-    float mConfidenceThreshold  = 0.25;
-    float mScoreThreshold       = 0.45;
+    float mConfidenceThreshold  = 0.65;
+    float mScoreThreshold       = 0.55;
     float mNMSThreshold         = 0.50;
     std::vector<std::string> mObjClasses = {
         "biodegradable", "cardboard", "glass", "metal", "paper", "plastic"
