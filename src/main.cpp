@@ -59,6 +59,8 @@ int main()
 
         // TODO: 결과 파싱, json화, 전송
         nlohmann::json json = objHandler.CreateJson(detections);
+        std::string jsonStr = json.dump();
+        tcpHandler.sendData(jsonStr.c_str(), jsonStr.size());
 
         // h.264 압축
         encodeHandler.EncodeFrame(inFrame, encodedFrame);
