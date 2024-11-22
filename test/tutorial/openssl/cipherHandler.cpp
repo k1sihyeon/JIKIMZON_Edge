@@ -13,7 +13,7 @@ CipherHandler::CipherHandler()
         std::cerr << "Error: new ctx" << std::endl;
     }
 
-    loadKey("/keyfile.bin");
+    loadKey("./keyfile.bin");
 }
 
 CipherHandler::~CipherHandler()
@@ -44,7 +44,6 @@ void CipherHandler::loadKey(const std::string& path)
     memcpy(mKey, key, 32);
 }
 
-// unsigned char* CipherHandler::EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest, uint8_t* dedest)
 void CipherHandler::EncryptData(unsigned char* iv, std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest)
 {
     for (unsigned char i = 0; i < 12; i++)
@@ -73,19 +72,9 @@ void CipherHandler::DecryptData(unsigned char* iv, std::vector<uint8_t>& src, in
         std::cerr << "Error: decrypt init" << std::endl;
     }
 
+    int len;
     if (EVP_DecryptUpdate(mCTX, dest.data(), &len, src.data(), size) != 1)
     {
         std::cerr << "Error: decrypt update" << std::endl;
     }
-}
-
-void CipherHandler::Cmp(std::vector<uint8_t>& en, uint8_t* de, size_t size) {
-    for (size_t i = 0; i < size; i++) {
-        if (en[i] != de[i]) {
-            std:: cout << "FAILED" << std::endl;
-            return;
-        }
-    }
-    std:: cout << "SUCCESSED" << std::endl;
-    return;
 }

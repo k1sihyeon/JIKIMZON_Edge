@@ -1,6 +1,7 @@
 #ifndef JIKIMZON_CIPHERHANDLER_H
 #define JIKIMZON_CIPHERHANDLER_H
 
+#include <string>
 #include <vector>
 #include <cstdint>
 #include <openssl/evp.h>
@@ -10,9 +11,8 @@ public:
     CipherHandler();
     ~CipherHandler();
 
-    std::vector<uint8_t> EncryptData(unsigned char* iv, std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest);
-    std::vector<uint8_t> DecryptData(unsigned char* iv, std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest);
-    void Cmp(std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest);
+    void EncryptData(unsigned char* iv, std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest);
+    void DecryptData(unsigned char* iv, std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest);
 
 private:
     unsigned char mKey[32];
