@@ -23,15 +23,18 @@ int main()
 
     frame.Serialize(outBuffer);
 
-    frame.Deserialize(outBuffer);
-    frame::Header outHeader = frame.GetHeader();
-
-    std::cout << "frameId: " << outHeader.frameId << std::endl;
-    std::cout << "bodySize: " << outHeader.bodySize << std::endl;
-    std::cout << "imageWidth: " << outHeader.imageWidth << std::endl;
-    std::cout << "imageHeight: " << outHeader.imageHeight << std::endl;
+    frame::Frame outFrame;
+    outFrame.Deserialize(outBuffer);
+    
+    frame::Header outHeader = outFrame.GetHeader();
+    std::cout << "frameId: " << static_cast<int>(outHeader.frameId) << std::endl;
+    std::cout << "bodySize: " << static_cast<int>(outHeader.bodySize) << std::endl;
+    std::cout << "imageWidth: " << static_cast<int>(outHeader.imageWidth) << std::endl;
+    std::cout << "imageHeight: " << static_cast<int>(outHeader.imageHeight) << std::endl;
     std::cout << "imageFormat: " << static_cast<int>(outHeader.imageFormat) << std::endl;
     std::cout << "timestamp: " << outHeader.timestamp << std::endl;
     
+    // !!!! imageFormat에는 정적 캐스트 필수 !!!!
+
     return 0;
 }
