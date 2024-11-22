@@ -6,37 +6,33 @@
 
 namespace data
 {
-    struct Frame
+    struct FrameHeader
     {
-        std::string     timestamp;          // 타임스탬프                // 19
-        uint8_t         *encryptedFrame;    // 암호화된 프레임 데이터    // 2764800 = width * height * channels(3)
+        unsigned int    frameId;            // 프레임 아이디
+        size_t          frameSize;          // 프레임 사이즈
+        // unsigned int    width;              // 프레임 너비
+        // unsigned int    height;             // 프레임 높이
+        char            timestamp[19];      // 타임스탬프                // 19
     };
 
-    struct Detection
-    {
-        std::string timeStamp;
-        int         classId;
-        std::string className;
-        float       confidence;
-        cv::Rect    box;
-    };
+    // struct Frame
+    // {
+    //     unsigned int    frameId;            // 프레임 아이디
+    //     size_t          frameSize;          // 프레임 사이즈
+    //     std::string     timestamp;          // 타임스탬프                // 19
+    //     cv::Mat         frame;              // 프레임 데이터
+
+    //     //uint8_t         *encryptedFrame;    // 암호화된 프레임 데이터
+    // };
 
     // size
-    const int TIMESTAMP_SIZE    = 19;
-    const int IV_SIZE           = 12;
-    const int FRAME_SIZE        = 2764800;
-    const int CLASSNAME_SIZE    = 13;
+    //const int TIMESTAMP_SIZE    = sizeof(char) * 19;
+    // const int FRAME_HEADER_SIZE = sizeof(unsigned int) + sizeof(size_t) + (sizeof(char) * 19);
+    
 
     // functions
-    std::string GetCurrentTime();
-    std::string PadFixedLength(std::string& str, int length);
-    
-    void SerializeFrame(std::string timestamp, uint8_t *encryptedFrame, std::vector<uint8_t>& buffer);
-    void SerializeFrame(data::Frame& frameData, std::vector<uint8_t>& buffer);
-    void DeserializeFrame(std::vector<uint8_t>& buffer, data::Frame& frameData);
-
-    void SerializeDetection(data::Detection& detection, std::vector<uint8_t>& buffer);
-    void DeserializeDetection(std::vector<uint8_t>& buffer, data::Detection& detection);
+    void SerializeFrameHeader(data::FrameHeader& frameHeader, std::vector<uint8_t>& buffer);
+    void DeserializeFrameHeader(std::vector<uint8_t>& buffer, data::FrameHeader& frameHeader);
 }
 
 #endif

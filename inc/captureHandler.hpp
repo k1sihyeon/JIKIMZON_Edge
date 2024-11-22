@@ -2,6 +2,7 @@
 #define JIKIMZON_CAPTUREHANDLER_H
 
 #include "data.hpp"
+#include "objectHandler.hpp"
 
 #include <opencv2/opencv.hpp>
 
@@ -13,7 +14,7 @@ public:
     void InitCapture(int, int, int, int);
     bool GetFrame(cv::Mat&);
     void ShowFrame(cv::Mat&);
-    void ShowFrame(cv::Mat&, std::vector<data::Detection>&);
+    void ShowFrame(cv::Mat&, object::Detection&);
 
 private:
     cv::VideoCapture mCap;

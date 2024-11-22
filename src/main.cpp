@@ -4,6 +4,7 @@
 #include "objectHandler.hpp"
 
 #include "data.hpp"
+#include "utils.hpp"
 #include "cipherHandler.hpp"
 
 #include <unistd.h>
@@ -39,6 +40,9 @@ int main()
     std::vector<uint8_t> encryptedFrame;
     std::vector<uint8_t> decryptedFrame;
 
+    unsigned int frameId = 0;
+    std::vector<uint8_t> buffer;
+
     while (true) 
     {
         cv::Mat inFrame;
@@ -47,41 +51,61 @@ int main()
             continue;
         }
 
-        std::string timestamp = data::GetCurrentTime();
-        std::cout << "===== timestamp: " << timestamp << " =====" << std::endl;
+        // 타임 스탬프
+        std::string timestamp = utils.GetCurrentTime();
+
+        // 프레임 헤더 생성
+        data::FrameHeader frameData;
+        frameData.frameId = frameId;
+        std::strcpy(frameData.timestamp, timestamp.c_str());
+        frameData.frameSize = inFrame.total() * inFrame.elemSize();
+
+        // 직렬화
+        data::SerializeFrameHeader(frameData, buffer);
+
+        // tcp 전송 - 프레임 헤더 먼저
+        tcpHandler.SendData(buffer.data(), buffer.size()); 
+
+        // tcp 전송 - 프레임 데이터
+        tcpHandler.SendData(inFrame.data, inFrame.total() * inFrame.elemSize());
+
+        frameId += 1;
+
 
         // TODO: 전처리
         
         // 모델 추론
-        object::Detection detections;
-        detections = objHandler.DetectObject(inFrame);
+        //object::Detection detections;
+        //detections = objHandler.DetectObject(inFrame);
 
 
         // 디버깅용 화면 출력
-        capHandler.ShowFrame(inFrame, detections);
+        // capHandler.ShowFrame(inFrame, detections);
 
 
         // TODO: 결과 파싱, json화, 전송
-        nlohmann::json json = objHandler.CreateJson(detections);
+        // nlohmann::json json = objHandler.CreateJson(detections);
 
         // h.264 압축
-        encodeHandler.EncodeFrame(inFrame, encodedFrame);
+        // encodeHandler.EncodeFrame(inFrame, encodedFrame);
         
         // 암호화 && tcp 전송
-        auto key = cipherHandler.Init();
+        // auto key = cipherHandler.Init();
 
         // tcpHandler.SendData(key, (size_t)32UL); 
 
         // cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame, decryptedFrame);
-        auto iv = cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
-        tcpHandler.SendData(iv, (size_t)12UL); 
+        // auto iv = cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
+        // tcpHandler.SendData(iv, (size_t)12UL); 
 
         // if (cipherHandler.isEqual(encodedFrame, decryptedFrame, sizeof(encodedFrame)))
         // {
         //     std::cout<<"true";
         // }
 
-        // tcp 전송
-        tcpHandler.SendData(encryptedFrame); 
+        // // tcp 전송
+        // tcpHandler.SendData(encryptedFrame); 
+
+        // frameId += 1;
     }
 }
