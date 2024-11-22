@@ -7,7 +7,9 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-#define PORT    12345
+#include "frame.hpp"
+
+#define PORT    1234
 
 class TcpHandler
 {
@@ -18,7 +20,7 @@ public:
     void InitSocket();
     void SendData(const unsigned char* ci, size_t size);
     void SendData(std::vector<uint8_t>& frame);
-    
+    //void SendHeader(Frame::Header& header);
 
 private:
     
