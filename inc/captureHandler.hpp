@@ -17,7 +17,6 @@ public:
 
 private:
     cv::VideoCapture mCap;
-    
 };
 
 #endif
