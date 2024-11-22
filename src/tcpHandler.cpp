@@ -66,3 +66,17 @@ void TcpHandler::SendData(std::vector<uint8_t>& frame)
         perror("send frame");
     }
 }
+
+void TcpHandler::SendMatFrame(cv::Mat& frame)
+{
+	if (mClientSock < 0)
+	{
+		std::cerr << "not valid client sock" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (send(mClientSock, frame.data, frame.total() * frame.elemSize(), 0) < 0)
+	{
+		perror("send frame");
+	}
+}

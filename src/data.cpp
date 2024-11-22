@@ -9,5 +9,10 @@ void data::SerializeFrameHeader(data::FrameHeader& frameHeader, std::vector<uint
 
 void data::DeserializeFrameHeader(std::vector<uint8_t>& buffer, data::FrameHeader& frameHeader)
 {
+    if (buffer.size() != sizeof(FrameHeader))
+    {
+        throw std::runtime_error("Invalid buffer size for FrameHeader");
+    }
+
     std::memcpy(&frameHeader, buffer.data(), sizeof(data::FrameHeader));
 }

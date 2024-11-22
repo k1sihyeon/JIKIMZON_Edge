@@ -40,8 +40,8 @@ int main()
     std::vector<uint8_t> encryptedFrame;
     std::vector<uint8_t> decryptedFrame;
 
-    unsigned int frameId = 0;
-    std::vector<uint8_t> buffer;
+    uint8_t frameId = 0;
+    std::vector<uint8_t> buffer(sizeof(data::FrameHeader));
 
     while (true) 
     {
@@ -52,25 +52,54 @@ int main()
         }
 
         // 타임 스탬프
-        std::string timestamp = utils.GetCurrentTime();
+        //std::string timestamp = utils.GetCurrentTime();
 
         // 프레임 헤더 생성
         data::FrameHeader frameData;
-        frameData.frameId = frameId;
+        frameData.frameId = 1001;
+        std::string timestamp = "20241122_123456.789";
         std::strcpy(frameData.timestamp, timestamp.c_str());
-        frameData.frameSize = inFrame.total() * inFrame.elemSize();
+        frameData.frameSize = 2002;
+
+        std::cout << "frameheader done" << std::endl;
 
         // 직렬화
+        buffer.clear();
         data::SerializeFrameHeader(frameData, buffer);
 
+        std::cout << "serialize done" << std::endl;
+
         // tcp 전송 - 프레임 헤더 먼저
-        tcpHandler.SendData(buffer.data(), buffer.size()); 
+        tcpHandler.SendData(buffer); 
+
+        std::cout << "header send done" << std::endl;
 
         // tcp 전송 - 프레임 데이터
-        tcpHandler.SendData(inFrame.data, inFrame.total() * inFrame.elemSize());
+        tcpHandler.SendMatFrame(inFrame);
 
-        frameId += 1;
+        // frameId += 1;
 
+        // 역직렬화 이후 비교
+        // data::FrameHeader frameDataDeseiralized;
+        // data::DeserializeFrameHeader(buffer, frameDataDeseiralized);
+
+        // if (frameData.frameId != frameDataDeseiralized.frameId)
+        // {
+        //     std::cout << "frameId not equal" << std::endl;
+        // }
+
+        // if (frameData.frameSize != frameDataDeseiralized.frameSize)
+        // {
+        //     std::cout << "frameSize not equal" << std::endl;
+        // }
+
+        // if (std::strcmp(frameData.timestamp, frameDataDeseiralized.timestamp) != 0)
+        // {
+        //     std::cout << "timestamp not equal" << std::endl;
+        // }
+
+        // std::cout << sizeof(data::FrameHeader) << std::endl;
+        ////////////////////////
 
         // TODO: 전처리
         

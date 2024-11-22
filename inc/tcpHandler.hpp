@@ -18,7 +18,7 @@ public:
     void InitSocket();
     void SendData(const unsigned char* ci, size_t size);
     void SendData(std::vector<uint8_t>& frame);
-    
+    void SendMatFrame(cv::Mat& frame);
 
 private:
     
