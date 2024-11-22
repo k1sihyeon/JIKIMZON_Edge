@@ -1,13 +1,4 @@
-#include "captureHandler.hpp"
-#include "tcpHandler.hpp"
-#include "encodeHandler.hpp"
-#include "objectHandler.hpp"
 #include "cipherHandler.hpp"
-
-#include <unistd.h>
-#include <limits.h>
-
-#include <opencv2/opencv.hpp>
 
 int main()
 {
