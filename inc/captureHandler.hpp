@@ -1,7 +1,7 @@
 #ifndef JIKIMZON_CAPTUREHANDLER_H
 #define JIKIMZON_CAPTUREHANDLER_H
 
-#include "objectHandler.hpp"
+#include "data.hpp"
 
 #include <opencv2/opencv.hpp>
 
@@ -17,7 +17,6 @@ public:
 
 private:
     cv::VideoCapture mCap;
-    
 };
 
 #endif

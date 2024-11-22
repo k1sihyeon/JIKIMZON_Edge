@@ -1,6 +1,8 @@
 #ifndef JIKIMZON_OBJECTHANDLER_H
 #define JIKIMZON_OBJECTHANDLER_H
 
+#include "data.hpp"
+
 #include <opencv2/opencv.hpp>
 #include <nlohmann/json.hpp>
 
@@ -25,6 +27,7 @@ public:
     ~ObjectHandler() = default;
 
     void InitModel(const std::string&, const cv::Size &inputShape = {640, 640});
+
     object::Detection DetectObject(cv::Mat&);
     nlohmann::json CreateJson(object::Detection detection);
 

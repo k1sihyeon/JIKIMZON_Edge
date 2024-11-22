@@ -9,7 +9,6 @@
 #include <unistd.h>
 #include <limits.h>
 #include <nlohmann/json.hpp>
-
 #include <opencv2/opencv.hpp>
 
 int main()
@@ -28,12 +27,15 @@ int main()
     TcpHandler tcpHandler;
     ObjectHandler objHandler;
     EncodeHandler encodeHandler(width, height, bitrate, fps);
+    CipherHandler cipherHandler;
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
     tcpHandler.InitSocket();
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
     std::vector<uint8_t> encodedFrame;
+    std::vector<uint8_t> encryptedFrame;
+    std::vector<uint8_t> decryptedFrame;
 
     unsigned int frameId = 0;
 
@@ -49,30 +51,20 @@ int main()
         //std::cout << "===== timestamp: " << timestamp << " =====" << std::endl;
 
         // TODO: 전처리
-        
-        // 모델 추론
-        object::Detection detections;
-        detections = objHandler.DetectObject(inFrame);
 
-        // 디버깅용 화면 출력
-        // capHandler.ShowFrame(inFrame, detections);
+        // 모델 추론
+        object::Detection detections = objHandler.DetectObject(inFrame);
 
         // TODO: 결과 파싱, json화, 전송
         nlohmann::json json = objHandler.CreateJson(detections);
         std::string jsonStr = json.dump();
         tcpHandler.sendData(jsonStr.c_str(), jsonStr.size());
-
         // h.264 압축
         encodeHandler.EncodeFrame(inFrame, encodedFrame);
-
-        // TODO: 암호화
         
         // 암호화 && tcp 전송
-        auto key = cipherHandler.Init();
-        // tcpHandler.SendData(key, (size_t)32UL); 
-
         // cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame, decryptedFrame);
-        auto iv = cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
+        cipherHandler.EncryptData(iv, encodedFrame, sizeof(encodedFrame), encryptedFrame);
         tcpHandler.SendData(iv, (size_t)12UL);
 
         // if (cipherHandler.isEqual(encodedFrame, decryptedFrame, sizeof(encodedFrame)))
