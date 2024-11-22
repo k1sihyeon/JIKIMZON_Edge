@@ -44,6 +44,7 @@ void CipherHandler::loadKey(const std::string& path)
     memcpy(mKey, key, 32);
 }
 
+// unsigned char* CipherHandler::EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest, uint8_t* dedest)
 void CipherHandler::EncryptData(unsigned char* iv, std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest)
 {
     for (unsigned char i = 0; i < 12; i++)
@@ -63,7 +64,28 @@ void CipherHandler::EncryptData(unsigned char* iv, std::vector<uint8_t>& src, in
     {
         std::cerr << "Error: encrypt update" << std::endl;
     }
+}
 
-    std::vector<uint8_t> vec(iv, iv + 12);
-    return vec;
+void CipherHandler::DecryptData(unsigned char* iv, std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest)
+{
+    if (EVP_DecryptInit_ex(mCTX, EVP_chacha20(), nullptr, mKey, iv) != 1)
+    {
+        std::cerr << "Error: decrypt init" << std::endl;
+    }
+
+    if (EVP_DecryptUpdate(mCTX, dest.data(), &len, src.data(), size) != 1)
+    {
+        std::cerr << "Error: decrypt update" << std::endl;
+    }
+}
+
+void CipherHandler::Cmp(std::vector<uint8_t>& en, uint8_t* de, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        if (en[i] != de[i]) {
+            std:: cout << "FAILED" << std::endl;
+            return;
+        }
+    }
+    std:: cout << "SUCCESSED" << std::endl;
+    return;
 }

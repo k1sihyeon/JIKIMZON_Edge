@@ -4,16 +4,13 @@
 #include <vector>
 #include <cstdint>
 #include <openssl/evp.h>
-#include <openssl/rand.h>
 
 class CipherHandler {
 public:
     CipherHandler();
     ~CipherHandler();
 
-    // unsigned char* EncryptData(std::vector<uint8_t>& src, int size, uint8_t* dest, std::vector<uint8_t>& dedest);
-    std::vector<uint8_t> EncryptData(std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest);
-    // bool IsEqual(std::vector<uint8_t>& en, uint8_t* de, size_t size);
+    void EncryptData(unsigned char* iv, std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest);
 
 private:
     unsigned char mKey[32];
