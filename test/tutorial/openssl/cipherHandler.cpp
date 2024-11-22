@@ -1,7 +1,6 @@
 #include "cipherHandler.hpp"
 
 #include <iostream>
-#include <vector>
 #include <cstring>
 #include <fstream>
 

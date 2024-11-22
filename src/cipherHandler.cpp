@@ -1,7 +1,6 @@
 #include "cipherHandler.hpp"
 
 #include <iostream>
-#include <vector>
 #include <cstring>
 #include <fstream>
 
@@ -13,7 +12,7 @@ CipherHandler::CipherHandler()
         std::cerr << "Error: new ctx" << std::endl;
     }
 
-    loadKey("/keyfile.bin");
+    loadKey("./keyfile.bin");
 }
 
 CipherHandler::~CipherHandler()

@@ -1,6 +1,7 @@
 #ifndef JIKIMZON_CIPHERHANDLER_H
 #define JIKIMZON_CIPHERHANDLER_H
 
+#include <string>
 #include <vector>
 #include <cstdint>
 #include <openssl/evp.h>
