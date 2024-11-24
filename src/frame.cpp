@@ -14,6 +14,11 @@ namespace frame
 
 	void Frame::Serialize(std::vector<uint8_t>& OUT buffer) const
     {
+        if (mHeader.GetBodySize() != mBody.GetImage().size())
+        {
+            throw std::runtime_error("Header body size is not equal to Body image size");
+        }
+
         std::vector<uint8_t> headerBuffer;
         std::vector<uint8_t> bodyBuffer;
 
