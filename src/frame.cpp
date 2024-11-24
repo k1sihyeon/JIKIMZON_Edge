@@ -1,54 +1,59 @@
 #include "frame.hpp"
 
 #include <arpa/inet.h>
+#include <cstdint>
 #include <iostream>
 #include <cstring>
 
 namespace frame
 {
-	void Frame::Serialize(std::vector<uint8_t>& OUT frameBuffer)
+    Frame::Frame(Header& header, Body& body)
+        : mHeader(header), mBody(body)
     {
-        // setup buffer size
-        frameBuffer.clear();
-        frameBuffer.resize(sizeof(Header) + mHeader.bodySize);
-
-        // serialize header
-        {
-            mHeader.frameId = htonl(mHeader.frameId);
-            mHeader.bodySize = htonl(mHeader.bodySize);
-            mHeader.imageWidth = htons(mHeader.imageWidth);
-            mHeader.imageHeight = htons(mHeader.imageHeight);
-    
-            std::memcpy(frameBuffer.data(), reinterpret_cast<void*>(&mHeader), sizeof(Header));
-        }
-
-        // serialize body
-        {
-            std::memcpy(frameBuffer.data() + sizeof(Header), mBody.image.data(), mBody.image.size());
-        }
     }
 
-    void Frame::Deserialize(std::vector<uint8_t>& OUT frameBuffer)
+	void Frame::Serialize(std::vector<uint8_t>& OUT buffer) const
     {
-        if (frameBuffer.size() < sizeof(Header))
+        std::vector<uint8_t> headerBuffer;
+        std::vector<uint8_t> bodyBuffer;
+
+        mHeader.Serialize(headerBuffer); // == headerBuffer = mHeader.Serialize();
+        mBody.Serialize(bodyBuffer);     // == bodyBuffer = mBody.Serialize();
+
+        buffer.clear();
+
+        buffer.insert(buffer.end(), headerBuffer.begin(), headerBuffer.end());
+        buffer.insert(buffer.end(), bodyBuffer.begin(), bodyBuffer.end());
+    }
+
+    std::vector<uint8_t> Frame::Serialize() const
+    {
+        std::vector<uint8_t> buffer;
+        this->Serialize(buffer);
+        return buffer;
+    }
+
+    void Frame::Deserialize(std::vector<uint8_t>& buffer)
+    {
+        if (buffer.size() < sizeof(Header))
         {
-            throw std::runtime_error("Buffer size is too small for a valid Frame.");
+            throw std::runtime_error("Buffer size is too small for a valid Frame");
         }
 
-        {
-            std::memcpy(&mHeader, frameBuffer.data(), sizeof(Header));
+        std::vector<uint8_t> headerBuffer(buffer.begin(), buffer.begin() + sizeof(Header));
+        mHeader.Deserialize(headerBuffer); 
 
-            mHeader.frameId = ntohl(mHeader.frameId);
-            mHeader.bodySize = ntohl(mHeader.bodySize);
-            mHeader.imageWidth = ntohs(mHeader.imageWidth);
-            mHeader.imageHeight = ntohs(mHeader.imageHeight);
+
+        size_t bodySize = mHeader.GetBodySize();
+
+        if (buffer.size() != sizeof(Header) + bodySize)
+        {
+            throw std::runtime_error("Buffer size is not equal to the sum of Header and Body size");
         }
 
-        {
-            size_t bodySize = frameBuffer.size() - sizeof(Header);
-            mBody.image.resize(bodySize);
-            std::memcpy(mBody.image.data(), frameBuffer.data() + sizeof(Header), bodySize);
-        }
+
+        std::vector<uint8_t> bodyBuffer(buffer.begin() + sizeof(Header), buffer.end());
+        mBody.Deserialize(bodyBuffer);
     }
 
 	const Header& Frame::GetHeader() const
@@ -59,9 +64,4 @@ namespace frame
 	{
 		return mBody;
 	}
-
-    void Frame::SetHeader(struct Header& header)
-    {
-        mHeader = header;
-    }
 }
