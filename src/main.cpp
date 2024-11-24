@@ -9,8 +9,8 @@
 
 #include <unistd.h>
 #include <limits.h>
+#include <cstdint>
 #include <nlohmann/json.hpp>
-
 #include <opencv2/opencv.hpp>
 
 int main()
@@ -26,7 +26,6 @@ int main()
     std::string path(buf);
 
     Utils utils;
-    frame::Frame frame;
     CaptureHandler capHandler;
     TcpHandler tcpHandler;
     ObjectHandler objHandler;
@@ -43,7 +42,6 @@ int main()
 
     std::vector<uint8_t> buffer;
     uint32_t frameId = 0;
-    //frame::Frame frame;
 
     while (true) 
     {
@@ -53,69 +51,58 @@ int main()
             continue;
         }
 
-        // //std::string timestamp = utils.GetCurrentTime();
-        // std::string timestamp = "20241122_123456.789";
-        // struct frame::Header header;
-        // header.frameId = static_cast<uint32_t>(frameId);
-        // header.bodySize = static_cast<uint32_t>(encryptedFrame.size());
-        // header.imageWidth = static_cast<uint16_t>(width);
-        // header.imageHeight = static_cast<uint16_t>(height);
-        // header.imageFormat = frame::ImageFormat::H264;
-        // std::strcpy(header.timestamp, timestamp.c_str());
-        // tcpHandler.SendData(buffer);
-
-        //frame.DeserializeFrameHeader
+        // 현재 시간
+        std::string timestamp = utils.GetCurrentTime();
 
         // TODO: 전처리
         
+
         // 모델 추론
-        // object::Detection detections;
-        // detections = objHandler.DetectObject(inFrame);
+        object::Detection detections;
+        detections = objHandler.DetectObject(inFrame, timestamp);
 
-
-        // 디버깅용 화면 출력
-        // capHandler.ShowFrame(inFrame, detections);
-
-
-        // TODO: 결과 파싱, json화, 전송
-        // nlohmann::json json = objHandler.CreateJson(detections);
+        // 탐지 결과 JSON 전송
+        nlohmann::json json = objHandler.CreateJson(detections);
+        tcpHandler.SendJson(json);
+            //tcpHandler.SendJson(objHandler.CreateJson(detections));
 
         // h.264 압축
-        // encodeHandler.EncodeFrame(inFrame, encodedFrame);
+        encodeHandler.EncodeFrame(inFrame, encodedFrame);
         
-        // 암호화 && tcp 전송
-        // auto key = cipherHandler.Init();
+        // 암호화
+        auto key = cipherHandler.Init();
+            // tcpHandler.SendData(key, (size_t)32UL); 
 
-        // tcpHandler.SendData(key, (size_t)32UL); 
+        cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
+            // auto iv = cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
+            // tcpHandler.SendData(iv, (size_t)12UL); 
 
-        // cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame, decryptedFrame);
-        // auto iv = cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
-        // tcpHandler.SendData(iv, (size_t)12UL); 
+        // frame header 설정
+        frame::HeaderStruct headerStruct {
+            .frameId    = static_cast<uint32_t>(frameId),
+            .bodySize   = static_cast<uint32_t>(encryptedFrame.size()),
+            .imageWidth = static_cast<uint16_t>(width),
+            .imageHeight = static_cast<uint16_t>(height),
+            .imageFormat = frame::ImageFormat::H264,
+        };
+        std::strcpy(headerStruct.timestamp, timestamp.c_str());
 
-        // if (cipherHandler.isEqual(encodedFrame, decryptedFrame, sizeof(encodedFrame)))
-        // {
-        //     std::cout<<"true";
-        // }
-
-        //std::string timestamp = utils.GetCurrentTime();
-        std::string timestamp = "20241122_123456.789";
-        struct frame::Header header;
-        header.frameId = static_cast<uint32_t>(1001);
-        header.bodySize = static_cast<uint32_t>(100);
-        header.imageWidth = static_cast<uint16_t>(width);
-        header.imageHeight = static_cast<uint16_t>(height);
-        header.imageFormat = frame::ImageFormat::H264;
-        std::strcpy(header.timestamp, timestamp.c_str());
+        frame::Header header(headerStruct);
         
-        frame.SetHeader(header);
+        // frame body 설정
+        frame::Body body(encryptedFrame);
+
+        // Frame 객체 생성
+        frame::Frame frame(header, body);
+
+        // Frame 객체 Serialize 후 전송
         frame.Serialize(buffer);
-
         tcpHandler.SendData(buffer);
 
-        // tcp 전송
-        std::vector<uint8_t> frameBuffer(header.bodySize, 2);
-        tcpHandler.SendData(frameBuffer); 
+        // 디버깅용 화면 출력
+        // capHandler.ShowFrame(inFrame, detections); // capHandler.ShowFrame(inFrame);
 
-        // frameId += 1;
+        // frame ID 증가
+        frameId += 1;
     }
 }
