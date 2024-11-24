@@ -26,7 +26,7 @@ namespace frame
         std::memcpy(buffer.data(), reinterpret_cast<void*>(&header), sizeof(HeaderStruct));
     }
 
-    std::vector<uint8_t> Header::Serialize()
+    std::vector<uint8_t> Header::Serialize() const
     {
         std::vector<uint8_t> buffer(sizeof(HeaderStruct));
 
