@@ -28,7 +28,7 @@ public:
 
     void InitModel(const std::string&, const cv::Size &inputShape = {640, 640});
 
-    object::Detection DetectObject(cv::Mat&);
+    object::Detection DetectObject(cv::Mat&, std::string);
     nlohmann::json CreateJson(object::Detection detection);
 
 private:

@@ -8,7 +8,7 @@ void ObjectHandler::InitModel(const std::string& path, const cv::Size &inputShap
     mModelInputShape = inputShape;
 }
 
-object::Detection ObjectHandler::DetectObject(cv::Mat& frame)
+object::Detection ObjectHandler::DetectObject(cv::Mat& frame, std::string timeStamp)
 {
     // 이미지를 모델 입력 크기에 맞추기
     cv::Mat blob = cv::dnn::blobFromImage(frame, 1 / 255.0, mModelInputShape, cv::Scalar(0, 0, 0), true, false);
@@ -87,7 +87,7 @@ object::Detection ObjectHandler::DetectObject(cv::Mat& frame)
     }
 
     object::Detection detection;
-    // detection.timeStamp
+    detection.timeStamp = timeStamp;
     detection.vObj = vObj;
 
     return detection;
