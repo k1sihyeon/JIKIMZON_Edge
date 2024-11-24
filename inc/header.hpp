@@ -1,6 +1,10 @@
 #ifndef JIKIMZON_HEADER_H
 #define JIKIMZON_HEADER_H
 
+#include <cstdint>
+#include <vector>
+#include <string>
+
 #include "ISerializeInterface.hpp"
 
 namespace frame
@@ -40,7 +44,7 @@ namespace frame
         uint8_t padding2[1];  // 1 byte (for alignment)
     };
 
-    class Header : public common::ISerializeInterface
+    class Header : virtual public common::ISerializeInterface
     {
     public:
         Header() = default;

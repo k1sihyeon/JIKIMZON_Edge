@@ -1,7 +1,6 @@
 #ifndef JIKIMZON_OBJECTHANDLER_H
 #define JIKIMZON_OBJECTHANDLER_H
 
-#include "data.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <nlohmann/json.hpp>

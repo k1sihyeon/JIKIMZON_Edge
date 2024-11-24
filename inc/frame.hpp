@@ -18,7 +18,7 @@ namespace frame
         H264 = 1
     };
 
-    class Frame : public common::ISerializeInterface
+    class Frame : virtual public common::ISerializeInterface
 	{
 	public:
         Frame() = default;

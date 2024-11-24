@@ -9,7 +9,7 @@
 
 namespace frame
 {
-    class Body : public common::ISerializeInterface
+    class Body : virtual public common::ISerializeInterface
     {
     public:
         Body() = default;
