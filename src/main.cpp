@@ -29,6 +29,7 @@ int main()
     ObjectHandler objHandler;
     EncodeHandler encodeHandler(width, height, bitrate, fps);
     CipherHandler cipherHandler;
+    PreprocessHandler preproHandler;
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
     tcpHandler.InitSocket();
@@ -51,12 +52,13 @@ int main()
         // 현재 시간
         std::string timestamp = utils.GetCurrentTime();
 
-        // TODO: 전처리
-        
+        // 전처리
+        cv::Mat pFrame;
+        preproHandler.Exposure(inFrame, pFrame);
 
         // 모델 추론
         object::Detection detections;
-        detections = objHandler.DetectObject(inFrame, timestamp);
+        detections = objHandler.DetectObject(pFrame, timestamp);
 
         // 탐지 결과 JSON 전송
         nlohmann::json json = objHandler.CreateJson(detections);
@@ -64,7 +66,7 @@ int main()
             //tcpHandler.SendJson(objHandler.CreateJson(detections));
 
         // h.264 압축
-        encodeHandler.EncodeFrame(inFrame, encodedFrame);
+        encodeHandler.EncodeFrame(pFrame, encodedFrame);
         
         // 암호화
         encryptedFrame.resize(encodedFrame.size());
