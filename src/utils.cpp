@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <iomanip>
+#include <sstream>
 
 std::string Utils::GetCurrentTime()
 {
@@ -12,7 +13,7 @@ std::string Utils::GetCurrentTime()
     localtime_r(&currentTime, &tm);
 
     auto duration = now.time_since_epoch();
-    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration) % 1'000;
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration) % 1000;
     
     std::ostringstream oss;
     oss << std::put_time(&tm, "%Y%m%d_%H%M%S");
