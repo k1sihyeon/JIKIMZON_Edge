@@ -6,8 +6,6 @@
 #include "frame.hpp"
 #include "utils.hpp"
 
-#include <unistd.h>
-#include <limits.h>
 #include <cstdint>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
@@ -19,16 +17,15 @@ int main()
     const int fps       = 15;
     const int bitrate   = 1000000;
 
-    // Get current working directory
-    char buf[PATH_MAX];
-    getcwd(buf, PATH_MAX);
-    std::string path(buf);
-
+    Utils utils;
     CaptureHandler capHandler;
     TcpHandler tcpHandler;
     ObjectHandler objHandler;
     EncodeHandler encodeHandler(width, height, bitrate, fps);
     CipherHandler cipherHandler;
+
+    // Get current working directory
+    std::string path = utils.GetWorkingDir();
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
     tcpHandler.InitSocket();
@@ -61,20 +58,16 @@ int main()
 
         // 탐지 결과 JSON 전송
         nlohmann::json json = objHandler.CreateJson(detections);
-        tcpHandler.SendJson(json);
+        //tcpHandler.SendJson(json);
             //tcpHandler.SendJson(objHandler.CreateJson(detections));
 
         // h.264 압축
         encodeHandler.EncodeFrame(inFrame, encodedFrame);
         
         // 암호화
-        auto key = cipherHandler.Init();
-            // tcpHandler.SendData(key, (size_t)32UL); 
-
-        cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
-            // auto iv = cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
-            // tcpHandler.SendData(iv, (size_t)12UL); 
-
+        encryptedFrame.resize(encodedFrame.size());
+        cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), encryptedFrame);
+      
         // frame header 설정
         frame::HeaderStruct headerStruct {
             .frameId    = static_cast<uint32_t>(frameId),
