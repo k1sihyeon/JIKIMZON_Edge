@@ -4,6 +4,7 @@ obj/
 
 
 *.h264
+*.bin
 
 # Prerequisites
 *.d

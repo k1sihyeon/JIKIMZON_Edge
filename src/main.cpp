@@ -2,10 +2,9 @@
 #include "tcpHandler.hpp"
 #include "encodeHandler.hpp"
 #include "objectHandler.hpp"
-
+#include "cipherHandler.hpp"
 #include "frame.hpp"
 #include "utils.hpp"
-#include "cipherHandler.hpp"
 
 #include <unistd.h>
 #include <limits.h>
@@ -25,7 +24,6 @@ int main()
     getcwd(buf, PATH_MAX);
     std::string path(buf);
 
-    Utils utils;
     CaptureHandler capHandler;
     TcpHandler tcpHandler;
     ObjectHandler objHandler;
@@ -38,7 +36,7 @@ int main()
 
     std::vector<uint8_t> encodedFrame;
     std::vector<uint8_t> encryptedFrame;
-    std::vector<uint8_t> decryptedFrame;
+    unsigned char iv[12];
 
     std::vector<uint8_t> buffer;
     uint32_t frameId = 0;
