@@ -62,7 +62,18 @@ void CipherHandler::EncryptData(unsigned char* iv, std::vector<uint8_t>& src, in
     {
         std::cerr << "Error: encrypt update" << std::endl;
     }
+}
 
-    std::vector<uint8_t> vec(iv, iv + 12);
-    return vec;
+void CipherHandler::DecryptData(unsigned char* iv, std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest)
+{
+    if (EVP_DecryptInit_ex(mCTX, EVP_chacha20(), nullptr, mKey, iv) != 1)
+    {
+        std::cerr << "Error: decrypt init" << std::endl;
+    }
+
+    int len;
+    if (EVP_DecryptUpdate(mCTX, dest.data(), &len, src.data(), size) != 1)
+    {
+        std::cerr << "Error: decrypt update" << std::endl;
+    }
 }
