@@ -43,14 +43,9 @@ void CipherHandler::loadKey(const std::string& path)
     memcpy(mKey, key, 32);
 }
 
-void CipherHandler::EncryptData(unsigned char* iv, std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest)
-{
-    for (unsigned char i = 0; i < 12; i++)
-    {
-        iv[i] = 0x02;
-    }
-    
-    // TODO: set iv
+void CipherHandler::EncryptData(std::string& timestamp, std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest)
+{    
+    const unsigned char* iv = reinterpret_cast<const unsigned char*>(timestamp.data());
 
     if (EVP_EncryptInit_ex(mCTX, EVP_chacha20(), nullptr, mKey, iv) != 1)
     {
@@ -62,7 +57,7 @@ void CipherHandler::EncryptData(unsigned char* iv, std::vector<uint8_t>& src, in
     {
         std::cerr << "Error: encrypt update" << std::endl;
     }
-
-    std::vector<uint8_t> vec(iv, iv + 12);
-    return vec;
+}
+CipherHandler::CipherHandler()
+{
 }

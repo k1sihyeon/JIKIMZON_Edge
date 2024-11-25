@@ -36,7 +36,6 @@ int main()
 
     std::vector<uint8_t> encodedFrame;
     std::vector<uint8_t> encryptedFrame;
-    unsigned char iv[12];
 
     std::vector<uint8_t> buffer;
     uint32_t frameId = 0;
@@ -68,13 +67,9 @@ int main()
         encodeHandler.EncodeFrame(inFrame, encodedFrame);
         
         // 암호화
-        auto key = cipherHandler.Init();
-            // tcpHandler.SendData(key, (size_t)32UL); 
-
-        cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
-            // auto iv = cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
-            // tcpHandler.SendData(iv, (size_t)12UL); 
-
+        encryptedFrame.resize(encodedFrame.size());
+        cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), encryptedFrame);
+      
         // frame header 설정
         frame::HeaderStruct headerStruct {
             .frameId    = static_cast<uint32_t>(frameId),
