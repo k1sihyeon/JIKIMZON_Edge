@@ -10,6 +10,8 @@
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 
+#define OUT
+
 int main()
 {
     const int width     = 1280;
@@ -60,19 +62,19 @@ int main()
         
 
         // 모델 추론
-        objHandler.DetectObject(inFrame, timestamp, detections);
+        objHandler.DetectObject(inFrame, timestamp, OUT detections);
 
         // 탐지 결과 JSON 전송
-        json = objHandler.CreateJson(detections);
+        objHandler.CreateJson(detections, OUT json);
         //tcpHandler.SendJson(json);
             //tcpHandler.SendJson(objHandler.CreateJson(detections));
 
         // h.264 압축
-        encodeHandler.EncodeFrame(inFrame, encodedFrame);
+        encodeHandler.EncodeFrame(inFrame, OUT encodedFrame);
         
         // 암호화
         encryptedFrame.resize(encodedFrame.size());
-        cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), encryptedFrame);
+        cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), OUT encryptedFrame);
       
         // frame header 설정
         headerStruct.frameId    = static_cast<uint32_t>(frameId);
@@ -91,7 +93,7 @@ int main()
         frame.SetFrame(header, body);
 
         // Frame 객체 Serialize 후 전송
-        frame.Serialize(buffer);
+        frame.Serialize(OUT buffer);
         tcpHandler.SendData(buffer);
 
         // 디버깅용 화면 출력
