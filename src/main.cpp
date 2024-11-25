@@ -33,7 +33,6 @@ int main()
 
     std::vector<uint8_t> encodedFrame;
     std::vector<uint8_t> encryptedFrame;
-    unsigned char iv[12];
 
     while (true) 
     {
@@ -42,6 +41,8 @@ int main()
         {
             continue;
         }
+
+        std::string timestamp = utils.GetCurrentTime();
 
         // TODO: 전처리
 
@@ -56,8 +57,7 @@ int main()
         
         // 암호화 && tcp 전송
         encryptedFrame.resize(encodedFrame.size());
-        cipherHandler.EncryptData(iv, encodedFrame, encodedFrame.size(), encryptedFrame);
-        tcpHandler.SendData(iv, (size_t)12UL); 
+        cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), encryptedFrame);
 
         // tcp 전송
         // tcpHandler.SendData(encryptedFrame); 
