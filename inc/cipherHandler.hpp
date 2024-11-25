@@ -11,7 +11,7 @@ public:
     CipherHandler();
     ~CipherHandler();
 
-    void EncryptData(unsigned char* iv, std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest);
+    void EncryptData(std::string& timestamp, std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest);
 
 private:
     unsigned char mKey[32];
