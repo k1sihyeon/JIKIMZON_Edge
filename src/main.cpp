@@ -31,33 +31,39 @@ int main()
     tcpHandler.InitSocket();
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
+    cv::Mat inFrame;
+    uint32_t frameId = 0;
+    std::string timestamp;
     std::vector<uint8_t> encodedFrame;
     std::vector<uint8_t> encryptedFrame;
     unsigned char iv[12];
+    object::Detection detections;
+    nlohmann::json json;
 
+    frame::HeaderStruct headerStruct;
+    frame::Header header;
+    frame::Body body;
+    frame::Frame frame;
     std::vector<uint8_t> buffer;
-    uint32_t frameId = 0;
 
     while (true) 
     {
-        cv::Mat inFrame;
         if (!capHandler.GetFrame(inFrame))
         {
             continue;
         }
 
         // 현재 시간
-        std::string timestamp = utils.GetCurrentTime();
+        timestamp = utils.GetCurrentTime();
 
         // TODO: 전처리
         
 
         // 모델 추론
-        object::Detection detections;
-        detections = objHandler.DetectObject(inFrame, timestamp);
+        objHandler.DetectObject(inFrame, timestamp, detections);
 
         // 탐지 결과 JSON 전송
-        nlohmann::json json = objHandler.CreateJson(detections);
+        json = objHandler.CreateJson(detections);
         //tcpHandler.SendJson(json);
             //tcpHandler.SendJson(objHandler.CreateJson(detections));
 
@@ -69,22 +75,20 @@ int main()
         cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), encryptedFrame);
       
         // frame header 설정
-        frame::HeaderStruct headerStruct {
-            .frameId    = static_cast<uint32_t>(frameId),
-            .bodySize   = static_cast<uint32_t>(encryptedFrame.size()),
-            .imageWidth = static_cast<uint16_t>(width),
-            .imageHeight = static_cast<uint16_t>(height),
-            .imageFormat = frame::ImageFormat::H264,
-        };
+        headerStruct.frameId    = static_cast<uint32_t>(frameId);
+        headerStruct.bodySize   = static_cast<uint32_t>(encryptedFrame.size());
+        headerStruct.imageWidth = static_cast<uint16_t>(width);
+        headerStruct.imageHeight = static_cast<uint16_t>(height);
+        headerStruct.imageFormat = frame::ImageFormat::H264;
         std::strcpy(headerStruct.timestamp, timestamp.c_str());
 
-        frame::Header header(headerStruct);
+        header.SetHeader(headerStruct);
         
         // frame body 설정
-        frame::Body body(encryptedFrame);
+        body.SetImage(encryptedFrame);
 
-        // Frame 객체 생성
-        frame::Frame frame(header, body);
+        // Frame 객체 설정
+        frame.SetFrame(header, body);
 
         // Frame 객체 Serialize 후 전송
         frame.Serialize(buffer);
