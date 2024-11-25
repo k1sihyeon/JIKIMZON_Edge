@@ -37,9 +37,9 @@ void CaptureHandler::ShowFrame(cv::Mat& inFrame)
     cv::waitKey(10);
 }
 
-void CaptureHandler::ShowFrame(cv::Mat& inFrame, std::vector<data::Detection>& detections)
+void CaptureHandler::ShowFrame(cv::Mat& inFrame, object::Detection& detections)
 {
-    for (const auto& detection : detections)
+    for (const auto& detection : detections.vObj)
     {
         cv::Rect box = detection.box;
         cv::Scalar color = cv::Scalar(125, 125, 0);
@@ -48,7 +48,7 @@ void CaptureHandler::ShowFrame(cv::Mat& inFrame, std::vector<data::Detection>& d
         cv::rectangle(inFrame, box, color, 2);
 
         // Detection box text
-        std::string classString = detection.className + ' ' + std::to_string(detection.confidence).substr(0, 4);
+        std::string classString = detection.className; // + ' ' + std::to_string(detection.confidence).substr(0, 4);
         cv::Size textSize = cv::getTextSize(classString, cv::FONT_HERSHEY_DUPLEX, 1, 2, 0);
         cv::Rect textBox(box.x, box.y - 40, textSize.width + 10, textSize.height + 20);
 

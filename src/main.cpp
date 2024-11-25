@@ -3,9 +3,12 @@
 #include "encodeHandler.hpp"
 #include "objectHandler.hpp"
 #include "cipherHandler.hpp"
+#include "frame.hpp"
+#include "utils.hpp"
 
 #include <unistd.h>
 #include <limits.h>
+#include <cstdint>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 
@@ -35,6 +38,9 @@ int main()
     std::vector<uint8_t> encryptedFrame;
     unsigned char iv[12];
 
+    std::vector<uint8_t> buffer;
+    uint32_t frameId = 0;
+
     while (true) 
     {
         cv::Mat inFrame;
@@ -43,23 +49,58 @@ int main()
             continue;
         }
 
+        // 현재 시간
+        std::string timestamp = utils.GetCurrentTime();
+
         // TODO: 전처리
+        
 
         // 모델 추론
-        object::Detection detections = objHandler.DetectObject(inFrame);
+        object::Detection detections;
+        detections = objHandler.DetectObject(inFrame, timestamp);
 
-        // TODO: 결과 파싱, json화, 전송
+        // 탐지 결과 JSON 전송
         nlohmann::json json = objHandler.CreateJson(detections);
-        
+        tcpHandler.SendJson(json);
+            //tcpHandler.SendJson(objHandler.CreateJson(detections));
+
         // h.264 압축
         encodeHandler.EncodeFrame(inFrame, encodedFrame);
         
-        // 암호화 && tcp 전송
-        encryptedFrame.resize(encodedFrame.size());
-        cipherHandler.EncryptData(iv, encodedFrame, encodedFrame.size(), encryptedFrame);
-        tcpHandler.SendData(iv, (size_t)12UL); 
+        // 암호화
+        auto key = cipherHandler.Init();
+            // tcpHandler.SendData(key, (size_t)32UL); 
 
-        // tcp 전송
-        // tcpHandler.SendData(encryptedFrame); 
+        cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
+            // auto iv = cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame);
+            // tcpHandler.SendData(iv, (size_t)12UL); 
+
+        // frame header 설정
+        frame::HeaderStruct headerStruct {
+            .frameId    = static_cast<uint32_t>(frameId),
+            .bodySize   = static_cast<uint32_t>(encryptedFrame.size()),
+            .imageWidth = static_cast<uint16_t>(width),
+            .imageHeight = static_cast<uint16_t>(height),
+            .imageFormat = frame::ImageFormat::H264,
+        };
+        std::strcpy(headerStruct.timestamp, timestamp.c_str());
+
+        frame::Header header(headerStruct);
+        
+        // frame body 설정
+        frame::Body body(encryptedFrame);
+
+        // Frame 객체 생성
+        frame::Frame frame(header, body);
+
+        // Frame 객체 Serialize 후 전송
+        frame.Serialize(buffer);
+        tcpHandler.SendData(buffer);
+
+        // 디버깅용 화면 출력
+        // capHandler.ShowFrame(inFrame, detections); // capHandler.ShowFrame(inFrame);
+
+        // frame ID 증가
+        frameId += 1;
     }
 }
