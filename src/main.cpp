@@ -3,78 +3,105 @@
 #include "encodeHandler.hpp"
 #include "objectHandler.hpp"
 #include "cipherHandler.hpp"
-#include "data.hpp"
+#include "frame.hpp"
 #include "utils.hpp"
 
-#include <unistd.h>
-#include <limits.h>
+#include <cstdint>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 
+#define OUT
+
 int main()
 {
-    const int width = 1280;
-    const int height = 720;
-    const int fps = 30;
-    const int bitrate = 1000000;
+    const int width     = 1280;
+    const int height    = 720;
+    const int fps       = 15;
+    const int bitrate   = 1000000;
 
-    // Get current working directory
-    char buf[PATH_MAX];
-    getcwd(buf, PATH_MAX);
-    std::string path(buf);
-
+    Utils utils;
     CaptureHandler capHandler;
     TcpHandler tcpHandler;
     ObjectHandler objHandler;
     EncodeHandler encodeHandler(width, height, bitrate, fps);
     CipherHandler cipherHandler;
 
+    // Get current working directory
+    std::string path = utils.GetWorkingDir();
+
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
     tcpHandler.InitSocket();
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
+    cv::Mat inFrame;
+    uint32_t frameId = 0;
+    std::string timestamp;
     std::vector<uint8_t> encodedFrame;
     std::vector<uint8_t> encryptedFrame;
-    std::vector<uint8_t> decryptedFrame;
+    unsigned char iv[12];
+    object::Detection detections;
+    nlohmann::json json;
+
+    frame::HeaderStruct headerStruct;
+    frame::Header header;
+    frame::Body body;
+    frame::Frame frame;
+    std::vector<uint8_t> buffer;
 
     unsigned int frameId = 0;
 
     while (true) 
     {
-        cv::Mat inFrame;
         if (!capHandler.GetFrame(inFrame))
         {
             continue;
         }
 
-        std::string timestamp = utils.GetCurrentTime();
-        //std::cout << "===== timestamp: " << timestamp << " =====" << std::endl;
+        // 현재 시간
+        timestamp = utils.GetCurrentTime();
 
         // TODO: 전처리
+        
 
         // 모델 추론
-        object::Detection detections = objHandler.DetectObject(inFrame);
+        objHandler.DetectObject(inFrame, timestamp, OUT detections);
 
-        // TODO: 결과 파싱, json화, 전송
-        nlohmann::json json = objHandler.CreateJson(detections);
-        std::string jsonStr = json.dump();
-        tcpHandler.sendData(jsonStr.c_str(), jsonStr.size());
+        // 탐지 결과 JSON 전송
+        objHandler.CreateJson(detections, OUT json);
+        //tcpHandler.SendJson(json);
+            //tcpHandler.SendJson(objHandler.CreateJson(detections));
+
         // h.264 압축
-        encodeHandler.EncodeFrame(inFrame, encodedFrame);
+        encodeHandler.EncodeFrame(inFrame, OUT encodedFrame);
         
-        // 암호화 && tcp 전송
-        // cipherHandler.EncryptData(encodedFrame, sizeof(encodedFrame), encryptedFrame, decryptedFrame);
-        cipherHandler.EncryptData(iv, encodedFrame, sizeof(encodedFrame), encryptedFrame);
-        tcpHandler.SendData(iv, (size_t)12UL);
+        // 암호화
+        encryptedFrame.resize(encodedFrame.size());
+        cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), OUT encryptedFrame);
+      
+        // frame header 설정
+        headerStruct.frameId    = static_cast<uint32_t>(frameId);
+        headerStruct.bodySize   = static_cast<uint32_t>(encryptedFrame.size());
+        headerStruct.imageWidth = static_cast<uint16_t>(width);
+        headerStruct.imageHeight = static_cast<uint16_t>(height);
+        headerStruct.imageFormat = frame::ImageFormat::H264;
+        std::strcpy(headerStruct.timestamp, timestamp.c_str());
 
-        // if (cipherHandler.isEqual(encodedFrame, decryptedFrame, sizeof(encodedFrame)))
-        // {
-        //     std::cout<<"true";
-        // }
+        header.SetHeader(headerStruct);
+        
+        // frame body 설정
+        body.SetImage(encryptedFrame);
 
-        // tcp 전송
-        tcpHandler.SendData(encryptedFrame);
+        // Frame 객체 설정
+        frame.SetFrame(header, body);
 
+        // Frame 객체 Serialize 후 전송
+        frame.Serialize(OUT buffer);
+        tcpHandler.SendData(buffer);
+
+        // 디버깅용 화면 출력
+        // capHandler.ShowFrame(inFrame, detections); // capHandler.ShowFrame(inFrame);
+
+        // frame ID 증가
         frameId += 1;
     }
 }

@@ -2,6 +2,9 @@
 
 #include <chrono>
 #include <iomanip>
+#include <sstream>
+#include <unistd.h>
+#include <limits.h>
 
 std::string Utils::GetCurrentTime()
 {
@@ -12,7 +15,7 @@ std::string Utils::GetCurrentTime()
     localtime_r(&currentTime, &tm);
 
     auto duration = now.time_since_epoch();
-    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration) % 1'000;
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration) % 1000;
     
     std::ostringstream oss;
     oss << std::put_time(&tm, "%Y%m%d_%H%M%S");
@@ -21,4 +24,13 @@ std::string Utils::GetCurrentTime()
     // format: YYYYMMDD_HHMMSS.sss
 
     return oss.str();
+}
+
+std::string Utils::GetWorkingDir()
+{
+    char buf[PATH_MAX];
+    getcwd(buf, PATH_MAX);
+    std::string path(buf);
+
+    return path;
 }

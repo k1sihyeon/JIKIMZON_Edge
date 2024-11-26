@@ -1,7 +1,7 @@
 #ifndef JIKIMZON_CAPTUREHANDLER_H
 #define JIKIMZON_CAPTUREHANDLER_H
 
-#include "data.hpp"
+#include "objectHandler.hpp"
 
 #include <opencv2/opencv.hpp>
 
