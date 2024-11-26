@@ -26,7 +26,8 @@ object::Detection ObjectHandler::DetectObject(cv::Mat& frame)
     if (outputs.empty())
     {
         std::cerr << "output is empty" << std::endl;
-        // exit(EXIT_FAILURE);
+        detections.vObj.clear();
+        return;
     }
 
     int rows = outputs[0].size[1];          // 탐지된 객체 수
@@ -92,21 +93,21 @@ object::Detection ObjectHandler::DetectObject(cv::Mat& frame)
     return detection;
 }
 
-nlohmann::json ObjectHandler::CreateJson(object::Detection detection)
+void ObjectHandler::CreateJson(uint32_t& frameId, object::Detection& detection, nlohmann::json& OUT json)
 {
-    nlohmann::json json;
+    json.clear();
 
-
-    json["timestamp"].push_back(detection.timeStamp);
+    json["frameId"] = frameId;
+    json["timestamp"] = detection.timeStamp;
 
     for (auto i: detection.vObj)
     {
         nlohmann::json obj;
-        obj["className"].push_back(i.className);
-        obj["x"].push_back(i.box.x);
-        obj["y"].push_back(i.box.y);
-        obj["width"].push_back(i.box.width);
-        obj["height"].push_back(i.box.height);
+        obj["className"] = i.className;
+        obj["x"] = i.box.x;
+        obj["y"] = i.box.y;
+        obj["width"] = i.box.width;
+        obj["height"] = i.box.height;
 
         json["object"].push_back(obj);
     }

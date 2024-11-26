@@ -25,8 +25,8 @@ public:
     ~ObjectHandler() = default;
 
     void InitModel(const std::string&, const cv::Size &inputShape = {640, 640});
-    object::Detection DetectObject(cv::Mat&);
-    nlohmann::json CreateJson(object::Detection detection);
+    void DetectObject(cv::Mat&, std::string&, OUT object::Detection&);
+    void CreateJson(uint32_t& frameId, object::Detection& detection, nlohmann::json& OUT json);
 
 private:
     cv::dnn::Net mYoloNet;
