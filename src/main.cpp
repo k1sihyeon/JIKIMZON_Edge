@@ -42,7 +42,6 @@ int main()
     std::string timestamp;
     std::vector<uint8_t> encodedFrame;
     std::vector<uint8_t> encryptedFrame;
-    unsigned char iv[12];
     object::Detection detections;
     nlohmann::json json;
 
@@ -51,8 +50,6 @@ int main()
     frame::Body body;
     frame::Frame frame;
     std::vector<uint8_t> buffer;
-
-    unsigned int frameId = 0;
 
     while (true) 
     {
@@ -72,13 +69,11 @@ int main()
         objHandler.DetectObject(pFrame, timestamp, OUT detections);
 
         // 탐지 결과 JSON 전송
-        objHandler.CreateJson(detections, OUT json);
+        objHandler.CreateJson(frameId, detections, OUT json);
         jsonTcpHandler.SendJson(json);
-            //tcpHandler.SendJson(objHandler.CreateJson(detections));
 
         // h.264 압축
         encodeHandler.EncodeFrame(pFrame, OUT encodedFrame);
-
         
         // 암호화
         encryptedFrame.resize(encodedFrame.size());
