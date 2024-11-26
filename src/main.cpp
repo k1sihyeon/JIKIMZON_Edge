@@ -22,7 +22,8 @@ int main()
 
     Utils utils;
     CaptureHandler capHandler;
-    TcpHandler tcpHandler;
+    TcpHandler frameTcpHandler;
+    TcpHandler jsonTcpHandler;
     ObjectHandler objHandler;
     EncodeHandler encodeHandler(width, height, bitrate, fps);
     CipherHandler cipherHandler;
@@ -31,7 +32,8 @@ int main()
     std::string path = utils.GetWorkingDir();
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
-    tcpHandler.InitSocket();
+    frameTcpHandler.InitSocket(12345);
+    jsonTcpHandler.InitSocket(56789);
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
     cv::Mat inFrame;
@@ -71,7 +73,7 @@ int main()
 
         // 탐지 결과 JSON 전송
         objHandler.CreateJson(detections, OUT json);
-        //tcpHandler.SendJson(json);
+        jsonTcpHandler.SendJson(json);
             //tcpHandler.SendJson(objHandler.CreateJson(detections));
 
         // h.264 압축
@@ -100,7 +102,7 @@ int main()
 
         // Frame 객체 Serialize 후 전송
         frame.Serialize(OUT buffer);
-        tcpHandler.SendData(buffer);
+        frameTcpHandler.SendData(buffer);
 
         // 디버깅용 화면 출력
         // capHandler.ShowFrame(inFrame, detections); // capHandler.ShowFrame(inFrame);
