@@ -42,7 +42,7 @@ void EncodeHandler::initEncoder()
         perror("Cannot allocate codec context");
     }
 
-    mCodecContext->bit_rate = 1000000;
+    mCodecContext->bit_rate = mBitrate;
     mCodecContext->width = mWidth;
     mCodecContext->height = mHeight;
     mCodecContext->time_base = (AVRational){1, mFps};
@@ -63,7 +63,7 @@ void EncodeHandler::initEncoder()
     mSwsContext = sws_getContext(mWidth, mHeight, AV_PIX_FMT_BGR24, mWidth, mHeight, AV_PIX_FMT_YUV420P, SWS_BICUBIC, nullptr, nullptr, nullptr);
 }
 
-void EncodeHandler::EncodeFrame(cv::Mat& frame, std::vector<uint8_t>& encodedFrame)
+void EncodeHandler::EncodeFrame(cv::Mat& frame, std::vector<uint8_t>& OUT encodedFrame)
 {
     AVFrame* avFrame = av_frame_alloc();
     if (!avFrame)

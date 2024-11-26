@@ -1,9 +1,10 @@
 #ifndef JIKIMZON_OBJECTHANDLER_H
 #define JIKIMZON_OBJECTHANDLER_H
 
-
 #include <opencv2/opencv.hpp>
 #include <nlohmann/json.hpp>
+
+#define OUT
 
 namespace object
 {
@@ -26,9 +27,8 @@ public:
     ~ObjectHandler() = default;
 
     void InitModel(const std::string&, const cv::Size &inputShape = {640, 640});
-
-    object::Detection DetectObject(cv::Mat&, std::string);
-    nlohmann::json CreateJson(object::Detection detection);
+    void DetectObject(cv::Mat&, std::string&, OUT object::Detection&);
+    void CreateJson(uint32_t& frameId, object::Detection& detection, nlohmann::json& OUT json);
 
 private:
     cv::dnn::Net mYoloNet;

@@ -14,12 +14,14 @@ extern "C" {
 #include <iostream>
 #include <opencv2/opencv.hpp>
 
+#define OUT
+
 class EncodeHandler {
 public:
     EncodeHandler(int width, int height, int bitrate, int fps);
     ~EncodeHandler();
     
-    void EncodeFrame(cv::Mat& frame, std::vector<uint8_t>& encodedFrame);
+    void EncodeFrame(cv::Mat& frame, std::vector<uint8_t>& OUT encodedFrame);
 private:
     void initEncoder();
 

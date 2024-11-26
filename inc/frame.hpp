@@ -29,6 +29,7 @@ namespace frame
         void Serialize(std::vector<uint8_t>& OUT buffer) const override;
 		void Deserialize(std::vector<uint8_t>& buffer) override;
 
+        void SetFrame(Header& header, Body& body);
 		const Header& GetHeader() const; 
         const Body& GetBody() const;
 

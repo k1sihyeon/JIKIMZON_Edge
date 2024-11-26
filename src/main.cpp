@@ -7,11 +7,11 @@
 #include "frame.hpp"
 #include "utils.hpp"
 
-#include <unistd.h>
-#include <limits.h>
 #include <cstdint>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
+
+#define OUT
 
 int main()
 {
@@ -20,79 +20,86 @@ int main()
     const int fps       = 15;
     const int bitrate   = 1000000;
 
-    // Get current working directory
-    char buf[PATH_MAX];
-    getcwd(buf, PATH_MAX);
-    std::string path(buf);
-
+    Utils utils;
     CaptureHandler capHandler;
     TcpHandler tcpHandler;
     ObjectHandler objHandler;
     EncodeHandler encodeHandler(width, height, bitrate, fps);
     CipherHandler cipherHandler;
 
+    // Get current working directory
+    std::string path = utils.GetWorkingDir();
+
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
     tcpHandler.InitSocket();
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
+    cv::Mat inFrame;
+    cv::Mat pFrame;
+    uint32_t frameId = 0;
+    std::string timestamp;
     std::vector<uint8_t> encodedFrame;
     std::vector<uint8_t> encryptedFrame;
+    unsigned char iv[12];
+    object::Detection detections;
+    nlohmann::json json;
 
+    frame::HeaderStruct headerStruct;
+    frame::Header header;
+    frame::Body body;
+    frame::Frame frame;
     std::vector<uint8_t> buffer;
-    uint32_t frameId = 0;
+
+    unsigned int frameId = 0;
 
     while (true) 
     {
-        cv::Mat inFrame;
         if (!capHandler.GetFrame(inFrame))
         {
             continue;
         }
 
         // 현재 시간
-        std::string timestamp = utils.GetCurrentTime();
+        timestamp = utils.GetCurrentTime();
 
         // 전처리
-        cv::Mat pFrame;
-        PreprocessHandler preproHandler(inFrame, pFrame);
+        PreprocessHandler preproHandler(inFrame, OUT pFrame);
         preproHandler.Threading();
 
         // 모델 추론
-        object::Detection detections;
-        detections = objHandler.DetectObject(pFrame, timestamp);
+        objHandler.DetectObject(pFrame, timestamp, OUT detections);
 
         // 탐지 결과 JSON 전송
-        nlohmann::json json = objHandler.CreateJson(detections);
-        tcpHandler.SendJson(json);
+        objHandler.CreateJson(detections, OUT json);
+        //tcpHandler.SendJson(json);
             //tcpHandler.SendJson(objHandler.CreateJson(detections));
 
         // h.264 압축
-        encodeHandler.EncodeFrame(pFrame, encodedFrame);
+        encodeHandler.EncodeFrame(pFrame, OUT encodedFrame);
+
         
         // 암호화
         encryptedFrame.resize(encodedFrame.size());
-        cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), encryptedFrame);
+        cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), OUT encryptedFrame);
       
         // frame header 설정
-        frame::HeaderStruct headerStruct {
-            .frameId    = static_cast<uint32_t>(frameId),
-            .bodySize   = static_cast<uint32_t>(encryptedFrame.size()),
-            .imageWidth = static_cast<uint16_t>(width),
-            .imageHeight = static_cast<uint16_t>(height),
-            .imageFormat = frame::ImageFormat::H264,
-        };
+        headerStruct.frameId    = static_cast<uint32_t>(frameId);
+        headerStruct.bodySize   = static_cast<uint32_t>(encryptedFrame.size());
+        headerStruct.imageWidth = static_cast<uint16_t>(width);
+        headerStruct.imageHeight = static_cast<uint16_t>(height);
+        headerStruct.imageFormat = frame::ImageFormat::H264;
         std::strcpy(headerStruct.timestamp, timestamp.c_str());
 
-        frame::Header header(headerStruct);
+        header.SetHeader(headerStruct);
         
         // frame body 설정
-        frame::Body body(encryptedFrame);
+        body.SetImage(encryptedFrame);
 
-        // Frame 객체 생성
-        frame::Frame frame(header, body);
+        // Frame 객체 설정
+        frame.SetFrame(header, body);
 
         // Frame 객체 Serialize 후 전송
-        frame.Serialize(buffer);
+        frame.Serialize(OUT buffer);
         tcpHandler.SendData(buffer);
 
         // 디버깅용 화면 출력
