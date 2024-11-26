@@ -48,8 +48,6 @@ int main()
     frame::Frame frame;
     std::vector<uint8_t> buffer;
 
-    unsigned int frameId = 0;
-
     while (true) 
     {
         if (!capHandler.GetFrame(inFrame))
@@ -67,9 +65,11 @@ int main()
         objHandler.DetectObject(inFrame, timestamp, OUT detections);
 
         // 탐지 결과 JSON 전송
-        objHandler.CreateJson(detections, OUT json);
-        //tcpHandler.SendJson(json);
-            //tcpHandler.SendJson(objHandler.CreateJson(detections));
+        if (!detections.vObj.empty())
+        {
+            objHandler.CreateJson(frameId, detections, OUT json);
+            tcpHandler.SendJson(json);
+        }
 
         // h.264 압축
         encodeHandler.EncodeFrame(inFrame, OUT encodedFrame);

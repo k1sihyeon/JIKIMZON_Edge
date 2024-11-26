@@ -25,7 +25,7 @@ void ObjectHandler::DetectObject(cv::Mat& frame, std::string& timeStamp, object:
 
     if (outputs.empty())
     {
-        std::cerr << "output is empty" << std::endl;
+        std::cerr << "[objectHandler] forward output is empty" << std::endl;
         detections.vObj.clear();
         return;
     }
@@ -108,4 +108,6 @@ void ObjectHandler::CreateJson(uint32_t& frameId, object::Detection& detection, 
 
         json["object"].push_back(obj);
     }
+
+    std::cout << std::setw(4) << json << std::endl;
 }

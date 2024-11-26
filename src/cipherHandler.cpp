@@ -60,3 +60,4 @@ void CipherHandler::EncryptData(std::string& timestamp, std::vector<uint8_t>& sr
     {
         std::cerr << "Error: encrypt update" << std::endl;
     }
+}
