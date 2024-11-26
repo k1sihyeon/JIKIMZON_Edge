@@ -42,7 +42,7 @@ void EncodeHandler::initEncoder()
         perror("Cannot allocate codec context");
     }
 
-    mCodecContext->bit_rate = 1000000;
+    mCodecContext->bit_rate = mBitrate;
     mCodecContext->width = mWidth;
     mCodecContext->height = mHeight;
     mCodecContext->time_base = (AVRational){1, mFps};
