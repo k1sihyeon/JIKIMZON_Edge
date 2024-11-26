@@ -3,6 +3,7 @@
 #include "encodeHandler.hpp"
 #include "objectHandler.hpp"
 #include "cipherHandler.hpp"
+#include "preprocessHandler.hpp"
 #include "frame.hpp"
 #include "utils.hpp"
 
@@ -34,6 +35,7 @@ int main()
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
     cv::Mat inFrame;
+    cv::Mat pFrame;
     uint32_t frameId = 0;
     std::string timestamp;
     std::vector<uint8_t> encodedFrame;
@@ -60,11 +62,12 @@ int main()
         // 현재 시간
         timestamp = utils.GetCurrentTime();
 
-        // TODO: 전처리
-        
+        // 전처리
+        PreprocessHandler preproHandler(inFrame, OUT pFrame);
+        preproHandler.Threading();
 
         // 모델 추론
-        objHandler.DetectObject(inFrame, timestamp, OUT detections);
+        objHandler.DetectObject(pFrame, timestamp, OUT detections);
 
         // 탐지 결과 JSON 전송
         objHandler.CreateJson(detections, OUT json);
@@ -72,7 +75,8 @@ int main()
             //tcpHandler.SendJson(objHandler.CreateJson(detections));
 
         // h.264 압축
-        encodeHandler.EncodeFrame(inFrame, OUT encodedFrame);
+        encodeHandler.EncodeFrame(pFrame, OUT encodedFrame);
+
         
         // 암호화
         encryptedFrame.resize(encodedFrame.size());
