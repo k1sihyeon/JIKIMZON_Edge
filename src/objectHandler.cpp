@@ -8,7 +8,7 @@ void ObjectHandler::InitModel(const std::string& path, const cv::Size &inputShap
     mModelInputShape = inputShape;
 }
 
-object::Detection ObjectHandler::DetectObject(cv::Mat& frame, std::string timeStamp)
+void ObjectHandler::DetectObject(cv::Mat& frame, std::string& timeStamp, object::Detection& OUT detections)
 {
     // 이미지를 모델 입력 크기에 맞추기
     cv::Mat blob = cv::dnn::blobFromImage(frame, 1 / 255.0, mModelInputShape, cv::Scalar(0, 0, 0), true, false);
@@ -74,7 +74,10 @@ object::Detection ObjectHandler::DetectObject(cv::Mat& frame, std::string timeSt
     std::vector<int> nms_result;
     cv::dnn::NMSBoxes(boxes, confidences, mScoreThreshold, mNMSThreshold, nms_result);
 
-    std::vector<object::Obj> vObj;
+    // OUT
+    detections.timeStamp = timeStamp;
+    detections.vObj.clear();
+
     for (unsigned long i = 0; i < nms_result.size(); ++i)
     {
         int idx = nms_result[i];
@@ -82,22 +85,12 @@ object::Detection ObjectHandler::DetectObject(cv::Mat& frame, std::string timeSt
         object::Obj obj;
         obj.className = mObjClasses[class_ids[idx]];
         obj.box = boxes[idx];
-
-        vObj.push_back(obj);
+        detections.vObj.push_back(obj);
     }
-
-    object::Detection detection;
-    detection.timeStamp = timeStamp;
-    detection.vObj = vObj;
-
-    return detection;
 }
 
-nlohmann::json ObjectHandler::CreateJson(object::Detection detection)
+void ObjectHandler::CreateJson(object::Detection& detection, nlohmann::json& OUT json)
 {
-    nlohmann::json json;
-
-
     json["timestamp"].push_back(detection.timeStamp);
 
     for (auto i: detection.vObj)
@@ -111,6 +104,4 @@ nlohmann::json ObjectHandler::CreateJson(object::Detection detection)
 
         json["object"].push_back(obj);
     }
-    
-    return json;
 }

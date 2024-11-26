@@ -69,4 +69,10 @@ namespace frame
 	{
 		return mBody;
 	}
+
+    void Frame::SetFrame(Header& header, Body& body)
+    {
+        mHeader = header;
+        mBody = body;
+    }
 }

@@ -34,8 +34,4 @@ clean:
 	rm -rf $(OBJ_DIR) $(TARGET)
 
 # Phony targets
-<<<<<<< HEAD
 .PHONY: all clean
-=======
-.PHONY: all clean
->>>>>>> feature/tcp-opencv
