@@ -34,7 +34,6 @@ void PreprocessHandler::Threading()
     {
         int start = i * rowsPerThread;
         int end = (i == numThread - 1) ? src.rows : (i + 1) * rowsPerThread;
-        // std::cout << "thread(" << start << ", " << end << "): " << i << std::endl;
 
         worker.emplace_back(std::thread(&PreprocessHandler::Exposure, this, start, end));
     }
@@ -50,12 +49,10 @@ void PreprocessHandler::Threading()
 
 void PreprocessHandler::Exposure(const int start, const int end)
 {
-    dest = src.clone();
     for (int y = start; y < end; y++)
     {
         for (int x = 0; x < src.cols; x++)
         {
-            std::cout << '(' << y << ", " << x << ')' << std::endl;
             for (int c = 0; c < 3; c++)
             {
                 dest.at<cv::Vec3b>(y, x)[c] = static_cast<uchar>(cumulativeHist.at<float>(src.at<cv::Vec3b>(y, x)[c]) * 255.0f);

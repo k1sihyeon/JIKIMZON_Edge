@@ -2,32 +2,31 @@
 
 #include <iostream>
 
-int main()
+int main(int argc, char* argv[])
 {
     cv::Mat input;
     cv::Mat output;
 
-    input = cv::imread("./lenna.jpg");
+    input = cv::imread(argv[1]);
     if (input.empty())
     {
         std::cerr << "Error: imread" << std::endl;
     }
+    
+    output = input.clone();
 
     cv::imshow("Original", input);
-
-    // std::cout << "input: " << input.rows << ", " << input.cols << std::endl;
 
     PreprocessHandler* ph = new PreprocessHandler(input, output);
 
     auto start = std::chrono::high_resolution_clock::now();
-    ph->Exposure(input.rows, input.cols);
+    ph->Exposure(0, input.rows);
     auto end = std::chrono::high_resolution_clock::now();
 
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     std::cout << "norm: " << duration << "ms" << std::endl;
 
     cv::imshow("norm", output);
-    output.release();
 
     start = std::chrono::high_resolution_clock::now();
     ph->Threading();
