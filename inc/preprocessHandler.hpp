@@ -10,13 +10,13 @@ public:
     ~PreprocessHandler() = default;
     
     void Threading();
-    void Exposure(const int start, const int end);
 
 private:
-    cv::Mat& src;
-    cv::Mat& dest;
+    cv::Mat& mSrc;
+    cv::Mat& mDest;
+    cv::Mat mCumulativeHist;
 
-    cv::Mat cumulativeHist;
+    void exposure(const int start, const int end);
 };
 
 #endif
