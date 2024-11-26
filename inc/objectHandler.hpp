@@ -28,7 +28,7 @@ public:
 
     void InitModel(const std::string&, const cv::Size &inputShape = {640, 640});
     void DetectObject(cv::Mat&, std::string&, OUT object::Detection&);
-    void CreateJson(object::Detection& detection, nlohmann::json& OUT json);
+    void CreateJson(uint32_t& frameId, object::Detection& detection, nlohmann::json& OUT json);
 
 private:
     cv::dnn::Net mYoloNet;

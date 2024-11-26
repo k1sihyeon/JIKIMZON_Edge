@@ -48,6 +48,8 @@ int main()
     frame::Frame frame;
     std::vector<uint8_t> buffer;
 
+    unsigned int frameId = 0;
+
     while (true) 
     {
         if (!capHandler.GetFrame(inFrame))
