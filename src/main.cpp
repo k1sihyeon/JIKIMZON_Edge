@@ -3,6 +3,7 @@
 #include "encodeHandler.hpp"
 #include "objectHandler.hpp"
 #include "cipherHandler.hpp"
+#include "preprocessHandler.hpp"
 #include "frame.hpp"
 #include "utils.hpp"
 
@@ -29,7 +30,6 @@ int main()
     ObjectHandler objHandler;
     EncodeHandler encodeHandler(width, height, bitrate, fps);
     CipherHandler cipherHandler;
-    PreprocessHandler preproHandler;
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
     tcpHandler.InitSocket();
@@ -54,7 +54,8 @@ int main()
 
         // 전처리
         cv::Mat pFrame;
-        preproHandler.Exposure(inFrame, pFrame);
+        PreprocessHandler preproHandler(inFrame, pFrame);
+        preproHandler.Threading();
 
         // 모델 추론
         object::Detection detections;
