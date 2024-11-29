@@ -40,24 +40,24 @@ namespace frame
 
     void Frame::Deserialize(std::vector<uint8_t>& buffer)
     {
-        if (buffer.size() < sizeof(Header))
+        if (buffer.size() < sizeof(HeaderStruct))
         {
             throw std::runtime_error("Buffer size is too small for a valid Frame");
         }
 
-        std::vector<uint8_t> headerBuffer(buffer.begin(), buffer.begin() + sizeof(Header));
+        std::vector<uint8_t> headerBuffer(buffer.begin(), buffer.begin() + sizeof(HeaderStruct));
         mHeader.Deserialize(headerBuffer); 
 
 
-        size_t bodySize = mHeader.GetBodySize();
+        //size_t bodySize = mHeader.GetBodySize();
 
-        if (buffer.size() != sizeof(Header) + bodySize)
+        if (buffer.size() != sizeof(HeaderStruct) + mHeader.GetBodySize())
         {
             throw std::runtime_error("Buffer size is not equal to the sum of Header and Body size");
         }
 
 
-        std::vector<uint8_t> bodyBuffer(buffer.begin() + sizeof(Header), buffer.end());
+        std::vector<uint8_t> bodyBuffer(buffer.begin() + sizeof(HeaderStruct), buffer.end());
         mBody.Deserialize(bodyBuffer);
     }
 
