@@ -2,7 +2,8 @@
 .vscode/
 obj/
 
-
+.crt
+.key
 *.h264
 *.bin
 
