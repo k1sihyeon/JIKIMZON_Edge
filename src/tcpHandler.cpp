@@ -7,7 +7,7 @@
 #include <sstream>
 #include <cstdint>
 
-void TcpHandler::InitSocket(int port)
+int TcpHandler::InitSocket(int port)
 {
 	mPort = port;
 
@@ -29,7 +29,7 @@ void TcpHandler::InitSocket(int port)
 	}
 
 	// Listen for incoming connections
-	listen(mSockfd, 5);
+	listen(mSockfd, 1);
 	std::cout << "[ port: " << mPort << " ] Waiting for a client to connect..." << std::endl;
 
 	// Accept a connection from client
@@ -40,52 +40,6 @@ void TcpHandler::InitSocket(int port)
 		exit(EXIT_FAILURE);
 	}
 	std::cout << "[ port: " << mPort << " ] Client connected" << std::endl;
-}
 
-void TcpHandler::SendData(const unsigned char* ci, size_t size)
-{
-    if (mClientSock < 0)
-    {
-        std::cerr << "[ port: " << mPort << " ] not valid client sock" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    if (send(mClientSock, ci, size, 0) < 0)
-    {
-		std::cerr << "[ port: " << mPort << " ] send data (size)" << std::endl;
-	}
-}
-
-void TcpHandler::SendData(std::vector<uint8_t>& data)
-{
-    if (mClientSock < 0)
-    {
-        std::cerr << "[ port: " << mPort << " ] not valid client sock" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-	if (send(mClientSock, data.data(), data.size(), 0) < 0)
-    {
-        std::cerr << "[ port: " << mPort << " ] send data" << std::endl;
-    }
-}
-
-void TcpHandler::SendFrame(frame::Frame& frame)
-{
-	std::vector<uint8_t> buffer = frame.Serialize();
-	this->SendData(buffer);
-}
-
-void TcpHandler::SendJson(const nlohmann::json& json)
-{
-	if (mClientSock < 0)
-    {
-        std::cerr << "[ port: " << mPort << " ] not valid client sock" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-	if (send(mClientSock, json.dump().c_str(), json.dump().size(), 0) < 0)
-	{
-		std::cerr << "[ port: " << mPort << " ] send json" << std::endl;
-	}
+	return mClientSock;
 }

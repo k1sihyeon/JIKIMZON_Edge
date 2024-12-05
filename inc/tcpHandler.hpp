@@ -15,11 +15,7 @@ public:
     TcpHandler() = default;
     ~TcpHandler() = default;
     
-    void InitSocket(int port);
-    void SendData(const unsigned char* ci, size_t size);
-    void SendData(std::vector<uint8_t>& data);
-    void SendFrame(frame::Frame& frame);
-    void SendJson(const nlohmann::json& json);
+    int InitSocket(int port);
 
 private:
     int mSockfd;
