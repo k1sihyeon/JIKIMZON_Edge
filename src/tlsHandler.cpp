@@ -37,12 +37,12 @@ void TlsHandler::createSSLContext()
 
 void TlsHandler::configureContext()
 {
-    if (SSL_CTX_use_certificate_file(mCTX, "server.crt", SSL_FILETYPE_PEM) <= 0)
+    if (SSL_CTX_use_certificate_file(mCTX, "../certs/server.crt", SSL_FILETYPE_PEM) <= 0)
     {
         std::cerr << "Failed get certificate" << std::endl;
     }
 
-    if (SSL_CTX_use_PrivateKey_file(mCTX, "server.key", SSL_FILETYPE_PEM) <= 0)
+    if (SSL_CTX_use_PrivateKey_file(mCTX, "../certs/server.key", SSL_FILETYPE_PEM) <= 0)
     {
         std::cerr << "Failed get private key" << std::endl;
     }
