@@ -1,9 +1,5 @@
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-#include <iostream>
-#include <cstring>
-#include <unistd.h>
-#include <arpa/inet.h>
+#include "tls.hpp"
+#include "tcp.hpp"
 
 void initializeOpenSSL() {
     SSL_load_error_strings();
@@ -38,33 +34,6 @@ void configureContext(SSL_CTX* ctx) {
     }
 }
 
-int createServerSocket(int port) {
-    int serverFd = socket(AF_INET, SOCK_STREAM, 0);
-    if (serverFd < 0) {
-        perror("Socket creation failed");
-        exit(EXIT_FAILURE);
-    }
-
-    sockaddr_in addr;
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
-    addr.sin_addr.s_addr = INADDR_ANY;
-
-    if (bind(serverFd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-        perror("Bind failed");
-        close(serverFd);
-        exit(EXIT_FAILURE);
-    }
-
-    if (listen(serverFd, 1) < 0) {
-        perror("Listen failed");
-        close(serverFd);
-        exit(EXIT_FAILURE);
-    }
-
-    return serverFd;
-}
-
 void handleClientConnection(int clientFd, SSL_CTX* ctx) {
     SSL* ssl = SSL_new(ctx);
     SSL_set_fd(ssl, clientFd);
@@ -84,31 +53,16 @@ void handleClientConnection(int clientFd, SSL_CTX* ctx) {
 }
 
 int main() {
-    initializeOpenSSL();
-    SSL_CTX* ctx = createSSLContext();
+    TLS* tls = new TLS();
+    TCP* tcp = new TCP();
 
-    configureContext(ctx);
-
-    int serverFd = createServerSocket(4433); // 예: 포트 4433
+    tls->Init();
+    int serverFd = tcp->CreateServerSocket();
 
     std::cout << "Server is listening on port 4433..." << std::endl;
 
-    while (true) {
-        sockaddr_in clientAddr;
-        socklen_t clientLen = sizeof(clientAddr);
-        int clientFd = accept(serverFd, (struct sockaddr*)&clientAddr, &clientLen);
-
-        if (clientFd < 0) {
-            perror("Accept failed");
-            continue;
-        }
-
-        handleClientConnection(clientFd, ctx);
-    }
-
-    close(serverFd);
-    SSL_CTX_free(ctx);
-    cleanupOpenSSL();
+    int clientFd = tcp->AcceptClient();
+    tls->HandleClientConnection(clientFd);
 
     return 0;
 }
