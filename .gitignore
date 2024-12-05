@@ -3,6 +3,8 @@
 obj/
 certs/
 
+*.crt
+*.key
 *.h264
 *.bin
 
