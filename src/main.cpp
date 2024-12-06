@@ -10,11 +10,25 @@
 #include <cstdint>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
+#include <iostream>
+#include <string>
 
 #define OUT
 
-int main()
+int main(int argc, char** argv)
 {
+    if (argc < 2)
+    {
+        std::cerr << "Usage: " << argv[0] << " <framePort> <jsonPort>" << std::endl;
+        return EXIT_FAILURE;
+    }
+    
+    std::string port1 = argv[1] ? argv[1] : "23456";
+    std::string port2 = argv[2] ? argv[2] : "54321";
+
+    int framePort = std::stoi(port1);
+    int jsonPort = std::stoi(port2);
+
     const int width     = 1280;
     const int height    = 720;
     const int fps       = 15;
@@ -32,8 +46,8 @@ int main()
     std::string path = utils.GetWorkingDir();
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
-    frameTcpHandler.InitSocket(12345);
-    jsonTcpHandler.InitSocket(56789);
+    frameTcpHandler.InitSocket(framePort);
+    jsonTcpHandler.InitSocket(jsonPort);
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
     cv::Mat inFrame;
@@ -53,6 +67,9 @@ int main()
 
     while (true) 
     {
+        // if (frameId > 100)
+        //     break;
+
         if (!capHandler.GetFrame(inFrame))
         {
             continue;
@@ -62,26 +79,37 @@ int main()
         timestamp = utils.GetCurrentTime();
 
         // 전처리
-        PreprocessHandler preproHandler(inFrame, OUT pFrame);
-        preproHandler.Threading();
+        // segmentation fault
+        // PreprocessHandler preproHandler(inFrame, OUT pFrame);
+        // preproHandler.Threading();
 
         // 모델 추론
-        objHandler.DetectObject(pFrame, timestamp, OUT detections);
-
+        objHandler.DetectObject(inFrame, timestamp, OUT detections);
+        
         // 탐지 결과 JSON 전송
-        objHandler.CreateJson(frameId, detections, OUT json);
-        jsonTcpHandler.SendJson(json);
+        if (!detections.vObj.empty())
+        {
+            objHandler.CreateJson(frameId, detections, OUT json);
+            jsonTcpHandler.SendJson(json);
+        }
+
+        for (auto& i : detections.vObj)
+        {
+            std::cout << "=============== json =================" << std::endl;
+            std::cout << "Object: " << i.className << std::endl;
+            std::cout << "=============== json ================" << std::endl;
+        }
 
         // h.264 압축
-        encodeHandler.EncodeFrame(pFrame, OUT encodedFrame);
-        
+        encodeHandler.EncodeFrame(timestamp, inFrame, OUT encodedFrame);
+
         // 암호화
-        encryptedFrame.resize(encodedFrame.size());
-        cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), OUT encryptedFrame);
-      
+        // encryptedFrame.resize(encodedFrame.size());
+        // cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), OUT encryptedFrame);
+
         // frame header 설정
         headerStruct.frameId    = static_cast<uint32_t>(frameId);
-        headerStruct.bodySize   = static_cast<uint32_t>(encryptedFrame.size());
+        headerStruct.bodySize   = static_cast<uint32_t>(encodedFrame.size());
         headerStruct.imageWidth = static_cast<uint16_t>(width);
         headerStruct.imageHeight = static_cast<uint16_t>(height);
         headerStruct.imageFormat = frame::ImageFormat::H264;
@@ -90,7 +118,7 @@ int main()
         header.SetHeader(headerStruct);
         
         // frame body 설정
-        body.SetImage(encryptedFrame);
+        body.SetImage(encodedFrame);
 
         // Frame 객체 설정
         frame.SetFrame(header, body);
@@ -98,11 +126,18 @@ int main()
         // Frame 객체 Serialize 후 전송
         frame.Serialize(OUT buffer);
         frameTcpHandler.SendData(buffer);
-
+        
+        std::cout << "Frame ID: " << frameId << std::endl;
+        std::cout << "Buffer Size: " << buffer.size() << std::endl;
+        std::cout << "Encoded Frame body Size: " << encodedFrame.size() << std::endl;
+        // std::cout << "Deserialized Frame Size: " << deserializedFrame.GetBody().GetImage().size() << std::endl;
+        std::cout << "=====================================" << std::endl;
         // 디버깅용 화면 출력
         // capHandler.ShowFrame(inFrame, detections); // capHandler.ShowFrame(inFrame);
 
         // frame ID 증가
         frameId += 1;
     }
+
+    return 0;
 }
