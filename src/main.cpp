@@ -2,7 +2,7 @@
 #include "tcpHandler.hpp"
 #include "encodeHandler.hpp"
 #include "objectHandler.hpp"
-#include "cipherHandler.hpp"
+// #include "cipherHandler.hpp"
 #include "frame.hpp"
 #include "utils.hpp"
 
@@ -28,14 +28,14 @@ int main()
     TcpHandler tcpHandler;
     ObjectHandler objHandler;
     EncodeHandler encodeHandler(width, height, bitrate, fps);
-    CipherHandler cipherHandler;
+    //  CipherHandler cipherHandler;
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
     tcpHandler.InitSocket();
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
     std::vector<uint8_t> encodedFrame;
-    std::vector<uint8_t> encryptedFrame;
+    // std::vector<uint8_t> encryptedFrame;
 
     std::vector<uint8_t> buffer;
     uint32_t frameId = 0;
@@ -67,13 +67,13 @@ int main()
         encodeHandler.EncodeFrame(inFrame, encodedFrame);
         
         // 암호화
-        encryptedFrame.resize(encodedFrame.size());
-        cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), encryptedFrame);
+        // encryptedFrame.resize(encodedFrame.size());
+        // cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), encryptedFrame);
       
         // frame header 설정
         frame::HeaderStruct headerStruct {
             .frameId    = static_cast<uint32_t>(frameId),
-            .bodySize   = static_cast<uint32_t>(encryptedFrame.size()),
+            .bodySize   = static_cast<uint32_t>(encodedFrame.size()),
             .imageWidth = static_cast<uint16_t>(width),
             .imageHeight = static_cast<uint16_t>(height),
             .imageFormat = frame::ImageFormat::H264,
@@ -83,7 +83,7 @@ int main()
         frame::Header header(headerStruct);
         
         // frame body 설정
-        frame::Body body(encryptedFrame);
+        frame::Body body(encodedFrame);
 
         // Frame 객체 생성
         frame::Frame frame(header, body);
