@@ -47,8 +47,8 @@ int main(int argc, char** argv)
     std::string path = utils.GetWorkingDir();
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
-    int frameFd = frameTcpHandler.InitSocket(12345);
-    int jsonFd = jsonTcpHandler.InitSocket(56789);
+    int frameFd = frameTcpHandler.InitSocket(framePort);
+    int jsonFd = jsonTcpHandler.InitSocket(jsonPort);
     TlsHandler frameTLS(frameFd);
     TlsHandler jsonTLS(jsonFd);
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
@@ -97,7 +97,7 @@ int main(int argc, char** argv)
         }
 
         // h.264 압축
-        encodeHandler.EncodeFrame(timestamp, inFrame, OUT encodedFrame);
+        encodeHandler.EncodeFrame(inFrame, OUT encodedFrame);
 
         // 암호화
         //encryptedFrame.resize(encodedFrame.size());
@@ -122,8 +122,6 @@ int main(int argc, char** argv)
         // Frame 객체 Serialize 후 전송
         frame.Serialize(OUT buffer);
         frameTLS.SendData(buffer);
-
-        frameTcpHandler.SendData(buffer);
         
         std::cout << "Frame ID: " << frameId << std::endl;
         std::cout << "Buffer Size: " << buffer.size() << std::endl;
