@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
+#include "utils.hpp"
+
 TlsHandler::TlsHandler(int clientFd): mClientFd(clientFd)
 {
     SSL_load_error_strings();
@@ -37,12 +39,16 @@ void TlsHandler::createSSLContext()
 
 void TlsHandler::configureContext()
 {
-    if (SSL_CTX_use_certificate_file(mCTX, "../certs/server.crt", SSL_FILETYPE_PEM) <= 0)
+    std::string path = utils.GetWorkingDir();
+
+    std::string cert = path + "/certs/server.cert";
+    if (SSL_CTX_use_certificate_file(mCTX, cert.c_str(), SSL_FILETYPE_PEM) <= 0)
     {
         std::cerr << "Failed get certificate" << std::endl;
     }
 
-    if (SSL_CTX_use_PrivateKey_file(mCTX, "../certs/server.key", SSL_FILETYPE_PEM) <= 0)
+    std::string key = path + "/certs/server.key";
+    if (SSL_CTX_use_PrivateKey_file(mCTX, key.c_str(), SSL_FILETYPE_PEM) <= 0)
     {
         std::cerr << "Failed get private key" << std::endl;
     }
@@ -58,10 +64,10 @@ void TlsHandler::clientConnect() {
     }
 }
 
-void TlsHandler::SendData(const nlohmann::json& json)
-{
-    SSL_write(mSSL, json.dump().c_str(), json.dump().size());
-}
+// void TlsHandler::SendData(const nlohmann::json& json)
+// {
+//     SSL_write(mSSL, json.dump().c_str(), json.dump().size());
+// }
 
 void TlsHandler::SendData(std::vector<uint8_t>& data)
 {
