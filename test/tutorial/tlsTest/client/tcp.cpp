@@ -1,40 +1,50 @@
 #include "tcp.hpp"
+#include <iostream>
 
 TCP::TCP()
+	: mHostname("192.168.10.99")
+	, mPort (12345)
 {   
-    mHostname = "192.168.10.99";
-    mPort = 4433;
+	std::cout << mHostname << std::endl;
+	std::cout << mPort << std::endl;
 }
 
 TCP::~TCP()
 {   
-    if (mClientFd)
+    if (mSocketFd)
     {
-        close(mClientFd);
+        close(mSocketFd);
     }
 }
 
 int TCP::CreateClientSocket() {
-    mClientFd = socket(AF_INET, SOCK_STREAM, 0);
-    if (mClientFd < 0) {
+    mSocketFd = socket(AF_INET, SOCK_STREAM, 0);
+    if (mSocketFd < 0) {
         perror("Socket creation failed");
         exit(EXIT_FAILURE);
     }
+	std::cout << "socket() success" << std::endl;
 
-    mServerAddr.sin_family = AF_INET;
-    mServerAddr.sin_port = htons(mPort);
+	sockaddr_in serverAddr{};
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(mPort);
 
-    if (inet_pton(AF_INET, mHostname, &mServerAddr.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, mHostname.c_str(), &serverAddr.sin_addr) <= 0) {
         perror("Invalid address or address not supported");
-        close(mClientFd);
+        close(mSocketFd);
         exit(EXIT_FAILURE);
     }
+	else {
+		std::cout << "setup" << std::endl;
+	}
 
-    if (connect(mClientFd, (struct sockaddr*)&mServerAddr, sizeof(mServerAddr)) < 0) {
+    if (connect(mSocketFd, (sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
         perror("Connection failed");
-        close(mClientFd);
+        close(mSocketFd);
         exit(EXIT_FAILURE);
     }
+	std::cout << "connect() success" << std::endl;
 
-    return mClientFd;
+
+    return mSocketFd;
 }

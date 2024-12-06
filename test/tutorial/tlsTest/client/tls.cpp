@@ -27,6 +27,8 @@ void TLS::createSSLContext()
         ERR_print_errors_fp(stderr);
         exit(EXIT_FAILURE);
     }
+	
+	std::cout << "createSSLContext() end" << std::endl;
 }
 
 void TLS::PerformTLSHandshake(int clientFd)

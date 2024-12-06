@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <iostream>
+#include <string>
 
 class TCP {
 public:
@@ -14,9 +15,8 @@ public:
 
 private:
     int mPort;
-    int mClientFd;
-    char* mHostname;
-    sockaddr_in mServerAddr;
+    int mSocketFd;
+    std::string mHostname;
 };
 
 #endif
