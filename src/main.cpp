@@ -2,7 +2,7 @@
 #include "tcpHandler.hpp"
 #include "encodeHandler.hpp"
 #include "objectHandler.hpp"
-#include "cipherHandler.hpp"
+//#include "cipherHandler.hpp"
 #include "preprocessHandler.hpp"
 #include "frame.hpp"
 #include "utils.hpp"
@@ -26,7 +26,7 @@ int main()
     TcpHandler jsonTcpHandler;
     ObjectHandler objHandler;
     EncodeHandler encodeHandler(width, height, bitrate, fps);
-    CipherHandler cipherHandler;
+    //  CipherHandler cipherHandler;
 
     // Get current working directory
     std::string path = utils.GetWorkingDir();
@@ -41,7 +41,7 @@ int main()
     uint32_t frameId = 0;
     std::string timestamp;
     std::vector<uint8_t> encodedFrame;
-    std::vector<uint8_t> encryptedFrame;
+    //std::vector<uint8_t> encryptedFrame;
     object::Detection detections;
     nlohmann::json json;
 
@@ -76,8 +76,8 @@ int main()
         encodeHandler.EncodeFrame(pFrame, OUT encodedFrame);
         
         // 암호화
-        encryptedFrame.resize(encodedFrame.size());
-        cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), OUT encryptedFrame);
+        //encryptedFrame.resize(encodedFrame.size());
+        //cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), OUT encryptedFrame);
       
         // frame header 설정
         headerStruct.frameId    = static_cast<uint32_t>(frameId);
@@ -90,7 +90,7 @@ int main()
         header.SetHeader(headerStruct);
         
         // frame body 설정
-        body.SetImage(encryptedFrame);
+        frame::Body body(encodedFrame);
 
         // Frame 객체 설정
         frame.SetFrame(header, body);
