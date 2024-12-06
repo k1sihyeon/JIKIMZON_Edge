@@ -33,7 +33,7 @@ int main()
     std::string path = utils.GetWorkingDir();
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
-    int framdFd = frameTcpHandler.InitSocket(12345);
+    int frameFd = frameTcpHandler.InitSocket(12345);
     int jsonFd = jsonTcpHandler.InitSocket(56789);
     TlsHandler frameTLS(frameFd);
     TlsHandler jsonTLS(jsonFd);
@@ -84,7 +84,7 @@ int main()
       
         // frame header 설정
         headerStruct.frameId    = static_cast<uint32_t>(frameId);
-        headerStruct.bodySize   = static_cast<uint32_t>(encryptedFrame.size());
+        headerStruct.bodySize   = static_cast<uint32_t>(encodedFrame.size());
         headerStruct.imageWidth = static_cast<uint16_t>(width);
         headerStruct.imageHeight = static_cast<uint16_t>(height);
         headerStruct.imageFormat = frame::ImageFormat::H264;
