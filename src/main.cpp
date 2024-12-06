@@ -6,6 +6,7 @@
 #include "preprocessHandler.hpp"
 #include "frame.hpp"
 #include "utils.hpp"
+#include "tlsHandler.hpp"
 
 #include <cstdint>
 #include <nlohmann/json.hpp>
@@ -32,8 +33,10 @@ int main()
     std::string path = utils.GetWorkingDir();
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
-    frameTcpHandler.InitSocket(12345);
-    jsonTcpHandler.InitSocket(56789);
+    int framdFd = frameTcpHandler.InitSocket(12345);
+    int jsonFd = jsonTcpHandler.InitSocket(56789);
+    TlsHandler frameTLS(frameFd);
+    TlsHandler jsonTLS(jsonFd);
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
     cv::Mat inFrame;
@@ -70,7 +73,7 @@ int main()
 
         // 탐지 결과 JSON 전송
         objHandler.CreateJson(frameId, detections, OUT json);
-        jsonTcpHandler.SendJson(json);
+        jsonTLS.SendData(json);
 
         // h.264 압축
         encodeHandler.EncodeFrame(pFrame, OUT encodedFrame);
@@ -97,7 +100,7 @@ int main()
 
         // Frame 객체 Serialize 후 전송
         frame.Serialize(OUT buffer);
-        frameTcpHandler.SendData(buffer);
+        frameTLS.SendData(buffer);
 
         // 디버깅용 화면 출력
         // capHandler.ShowFrame(inFrame, detections); // capHandler.ShowFrame(inFrame);
