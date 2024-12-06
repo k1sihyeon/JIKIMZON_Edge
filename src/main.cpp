@@ -2,10 +2,11 @@
 #include "tcpHandler.hpp"
 #include "encodeHandler.hpp"
 #include "objectHandler.hpp"
-#include "cipherHandler.hpp"
+//#include "cipherHandler.hpp"
 #include "preprocessHandler.hpp"
 #include "frame.hpp"
 #include "utils.hpp"
+#include "tlsHandler.hpp"
 
 #include <cstdint>
 #include <nlohmann/json.hpp>
@@ -40,14 +41,16 @@ int main(int argc, char** argv)
     TcpHandler jsonTcpHandler;
     ObjectHandler objHandler;
     EncodeHandler encodeHandler(width, height, bitrate, fps);
-    CipherHandler cipherHandler;
+    //  CipherHandler cipherHandler;
 
     // Get current working directory
     std::string path = utils.GetWorkingDir();
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
-    frameTcpHandler.InitSocket(framePort);
-    jsonTcpHandler.InitSocket(jsonPort);
+    int frameFd = frameTcpHandler.InitSocket(12345);
+    int jsonFd = jsonTcpHandler.InitSocket(56789);
+    TlsHandler frameTLS(frameFd);
+    TlsHandler jsonTLS(jsonFd);
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
     cv::Mat inFrame;
@@ -55,7 +58,7 @@ int main(int argc, char** argv)
     uint32_t frameId = 0;
     std::string timestamp;
     std::vector<uint8_t> encodedFrame;
-    std::vector<uint8_t> encryptedFrame;
+    //std::vector<uint8_t> encryptedFrame;
     object::Detection detections;
     nlohmann::json json;
 
@@ -90,23 +93,16 @@ int main(int argc, char** argv)
         if (!detections.vObj.empty())
         {
             objHandler.CreateJson(frameId, detections, OUT json);
-            jsonTcpHandler.SendJson(json);
-        }
-
-        for (auto& i : detections.vObj)
-        {
-            std::cout << "=============== json =================" << std::endl;
-            std::cout << "Object: " << i.className << std::endl;
-            std::cout << "=============== json ================" << std::endl;
+            jsonTLS.SendData(json);
         }
 
         // h.264 압축
         encodeHandler.EncodeFrame(timestamp, inFrame, OUT encodedFrame);
 
         // 암호화
-        // encryptedFrame.resize(encodedFrame.size());
-        // cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), OUT encryptedFrame);
-
+        //encryptedFrame.resize(encodedFrame.size());
+        //cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), OUT encryptedFrame);
+      
         // frame header 설정
         headerStruct.frameId    = static_cast<uint32_t>(frameId);
         headerStruct.bodySize   = static_cast<uint32_t>(encodedFrame.size());
@@ -118,13 +114,15 @@ int main(int argc, char** argv)
         header.SetHeader(headerStruct);
         
         // frame body 설정
-        body.SetImage(encodedFrame);
+        frame::Body body(encodedFrame);
 
         // Frame 객체 설정
         frame.SetFrame(header, body);
 
         // Frame 객체 Serialize 후 전송
         frame.Serialize(OUT buffer);
+        frameTLS.SendData(buffer);
+
         frameTcpHandler.SendData(buffer);
         
         std::cout << "Frame ID: " << frameId << std::endl;
