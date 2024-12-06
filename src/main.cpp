@@ -24,7 +24,7 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
     
-    std::string port1 = argv[1] ? argv[1] : "23456";
+    std::string port1 = argv[1] ? argv[1] : "12345";
     std::string port2 = argv[2] ? argv[2] : "54321";
 
     int framePort = std::stoi(port1);
@@ -67,6 +67,7 @@ int main(int argc, char** argv)
     frame::Body body;
     frame::Frame frame;
     std::vector<uint8_t> buffer;
+    std::vector<uint8_t> jsonBuffer;
 
     while (true) 
     {
@@ -93,16 +94,21 @@ int main(int argc, char** argv)
         if (!detections.vObj.empty())
         {
             objHandler.CreateJson(frameId, detections, OUT json);
-            jsonTLS.SendData(json);
-        }
+            
+            std::string jsonStr = json.dump() + "|";
+            jsonBuffer.resize(jsonStr.size());
+            std::copy(jsonStr.begin(), jsonStr.end(), jsonBuffer.begin());
 
+            jsonTLS.SendData(jsonBuffer);
+        }
+        
         // h.264 압축
         encodeHandler.EncodeFrame(inFrame, OUT encodedFrame);
 
         // 암호화
         //encryptedFrame.resize(encodedFrame.size());
         //cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), OUT encryptedFrame);
-      
+    
         // frame header 설정
         headerStruct.frameId    = static_cast<uint32_t>(frameId);
         headerStruct.bodySize   = static_cast<uint32_t>(encodedFrame.size());
