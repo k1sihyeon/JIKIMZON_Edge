@@ -2,7 +2,7 @@
 
 TCP::TCP()
 {   
-    mHostname = "127.0.0.1";
+    mHostname = "192.168.10.99";
     mPort = 4433;
 }
 

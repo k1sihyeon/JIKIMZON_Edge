@@ -10,7 +10,7 @@
 
 class TLS {
 public:
-    TLS();
+    TLS() = default;
     ~TLS();
 
     void Init();
