@@ -34,13 +34,14 @@ int main(int argc, char** argv)
     const int height    = 720;
     const int fps       = 15;
     const int bitrate   = 1000000;
+    const int gopSize   = 10;
 
     Utils utils;
     CaptureHandler capHandler;
     TcpHandler frameTcpHandler;
     TcpHandler jsonTcpHandler;
     ObjectHandler objHandler;
-    EncodeHandler encodeHandler(width, height, bitrate, fps);
+    EncodeHandler encodeHandler(width, height, bitrate, fps, gopSize);
     //  CipherHandler cipherHandler;
 
     // Get current working directory
@@ -71,9 +72,6 @@ int main(int argc, char** argv)
 
     while (true) 
     {
-        // if (frameId > 100)
-        //     break;
-
         if (!capHandler.GetFrame(inFrame))
         {
             continue;
@@ -115,8 +113,16 @@ int main(int argc, char** argv)
         headerStruct.imageWidth = static_cast<uint16_t>(width);
         headerStruct.imageHeight = static_cast<uint16_t>(height);
         headerStruct.imageFormat = frame::ImageFormat::H264;
+        headerStruct.gopSize = static_cast<uint8_t>(gopSize);
         std::strcpy(headerStruct.timestamp, timestamp.c_str());
-
+        if (frameId % gopSize == 0)
+        {
+            headerStruct.gopStartFlag = frame::GopStartFlag::START;
+        }
+        else
+        {
+            headerStruct.gopStartFlag = frame::GopStartFlag::END;
+        }
         header.SetHeader(headerStruct);
         
         // frame body 설정

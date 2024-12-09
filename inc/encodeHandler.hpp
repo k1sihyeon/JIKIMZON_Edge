@@ -18,7 +18,7 @@ extern "C" {
 
 class EncodeHandler {
 public:
-    EncodeHandler(int width, int height, int bitrate, int fps);
+    EncodeHandler(int width, int height, int bitrate, int fps, int gopSize);
     ~EncodeHandler();
     
     void EncodeFrame(cv::Mat& frame, std::vector<uint8_t>& OUT encodedFrame);
@@ -32,6 +32,7 @@ private:
     int mHeight;
     int mBitrate;
     int mFps;
+    int mGopSize;
 
     std::ofstream mFS;
 };

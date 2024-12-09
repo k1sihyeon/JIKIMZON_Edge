@@ -1,7 +1,7 @@
 #include "encodeHandler.hpp"
 
-EncodeHandler::EncodeHandler(int width, int height, int bitrate, int fps)
-                    : mCodecContext(nullptr), mWidth(width), mHeight(height), mBitrate(bitrate), mFps(fps)
+EncodeHandler::EncodeHandler(int width, int height, int bitrate, int fps, int gopSize)
+                    : mCodecContext(nullptr), mWidth(width), mHeight(height), mBitrate(bitrate), mFps(fps), mGopSize(gopSize)
 {
     initEncoder();
     mFS.open("output.h264", std::ios::binary);
@@ -47,7 +47,7 @@ void EncodeHandler::initEncoder()
     mCodecContext->height = mHeight;
     mCodecContext->time_base = (AVRational){1, mFps};
     mCodecContext->framerate = (AVRational){mFps, 1};
-    mCodecContext->gop_size = 10;
+    mCodecContext->gop_size = mGopSize;
     mCodecContext->max_b_frames = 0;
     mCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
 
