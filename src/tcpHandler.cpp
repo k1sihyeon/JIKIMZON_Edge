@@ -54,7 +54,7 @@ void TcpHandler::SendData(const unsigned char* ci, size_t size)
 	}
 }
 
-void TcpHandler::SendData(std::vector<uint8_t>& data)
+void TcpHandler::SendData(std::vector<uint8_t> data)
 {
     if (mClientSock < 0)
     {
@@ -68,13 +68,13 @@ void TcpHandler::SendData(std::vector<uint8_t>& data)
     }
 }
 
-void TcpHandler::SendFrame(frame::Frame& frame)
+void TcpHandler::SendFrame(frame::Frame frame)
 {
 	std::vector<uint8_t> buffer = frame.Serialize();
 	this->SendData(buffer);
 }
 
-void TcpHandler::SendJson(const nlohmann::json& json)
+void TcpHandler::SendJson(const nlohmann::json json)
 {
 	if (mClientSock < 0)
     {

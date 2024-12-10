@@ -19,7 +19,8 @@ public:
     EncodeHandler(int width, int height, int bitrate, int fps);
     ~EncodeHandler();
     
-    void EncodeFrame(cv::Mat& frame, std::vector<uint8_t>& encodedFrame);
+    std::vector<uint8_t> EncodeFrame(cv::Mat frame);
+    
 private:
     void initEncoder();
 

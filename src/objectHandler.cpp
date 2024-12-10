@@ -2,13 +2,13 @@
 
 #include <opencv2/opencv.hpp>
 
-void ObjectHandler::InitModel(const std::string& path, const cv::Size &inputShape)
+void ObjectHandler::InitModel(const std::string path, const cv::Size inputShape)
 {
     mYoloNet = cv::dnn::readNetFromONNX(path);
     mModelInputShape = inputShape;
 }
 
-object::Detection ObjectHandler::DetectObject(cv::Mat& frame, std::string timeStamp)
+object::Detection ObjectHandler::DetectObject(cv::Mat frame, std::string timeStamp)
 {
     // 이미지를 모델 입력 크기에 맞추기
     cv::Mat blob = cv::dnn::blobFromImage(frame, 1 / 255.0, mModelInputShape, cv::Scalar(0, 0, 0), true, false);

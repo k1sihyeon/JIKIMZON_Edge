@@ -63,8 +63,10 @@ void EncodeHandler::initEncoder()
     mSwsContext = sws_getContext(mWidth, mHeight, AV_PIX_FMT_BGR24, mWidth, mHeight, AV_PIX_FMT_YUV420P, SWS_BICUBIC, nullptr, nullptr, nullptr);
 }
 
-void EncodeHandler::EncodeFrame(cv::Mat& frame, std::vector<uint8_t>& encodedFrame)
+std::vector<uint8_t> EncodeHandler::EncodeFrame(cv::Mat frame)
 {
+    std::vector<uint8_t> encodedFrame;
+
     AVFrame* avFrame = av_frame_alloc();
     if (!avFrame)
     {
@@ -108,4 +110,6 @@ void EncodeHandler::EncodeFrame(cv::Mat& frame, std::vector<uint8_t>& encodedFra
 
     av_freep(&avFrame->data[0]);
     av_frame_free(&avFrame);
+
+    return encodedFrame;
 }

@@ -9,9 +9,12 @@
 #include <cstdint>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
+#include <chrono>
 
 int main()
 {
+    auto start = std::chrono::high_resolution_clock::now();
+
     const int width     = 1280;
     const int height    = 720;
     const int fps       = 15;
@@ -28,11 +31,9 @@ int main()
     std::string path = utils.GetWorkingDir();
 
     capHandler.InitCapture(0, width, height, fps);   // camIdx, width, height, fps
-    tcpHandler.InitSocket();
+    //tcpHandler.InitSocket();
     objHandler.InitModel(path + "/res/yolov5n-garbage.onnx");
 
-    std::vector<uint8_t> encodedFrame;
-    std::vector<uint8_t> encryptedFrame;
     unsigned char iv[12];
 
     std::vector<uint8_t> buffer;
@@ -40,6 +41,10 @@ int main()
 
     while (true) 
     {
+
+        if (frameId >= 200)
+            break;
+
         cv::Mat inFrame;
         if (!capHandler.GetFrame(inFrame))
         {
@@ -55,18 +60,19 @@ int main()
         // 모델 추론
         object::Detection detections;
         detections = objHandler.DetectObject(inFrame, timestamp);
-
+        
         // 탐지 결과 JSON 전송
         nlohmann::json json = objHandler.CreateJson(detections);
         //tcpHandler.SendJson(json);
             //tcpHandler.SendJson(objHandler.CreateJson(detections));
 
         // h.264 압축
-        encodeHandler.EncodeFrame(inFrame, encodedFrame);
+        std::vector<uint8_t> encodedFrame = encodeHandler.EncodeFrame(inFrame);
         
         // 암호화
+        std::vector<uint8_t> encryptedFrame;
         encryptedFrame.resize(encodedFrame.size());
-        cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), encryptedFrame);
+        encryptedFrame = cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size());
       
         // frame header 설정
         frame::HeaderStruct headerStruct {
@@ -88,7 +94,7 @@ int main()
 
         // Frame 객체 Serialize 후 전송
         frame.Serialize(buffer);
-        tcpHandler.SendData(buffer);
+        // tcpHandler.SendData(buffer);
 
         // 디버깅용 화면 출력
         // capHandler.ShowFrame(inFrame, detections); // capHandler.ShowFrame(inFrame);
@@ -96,4 +102,12 @@ int main()
         // frame ID 증가
         frameId += 1;
     }
+
+    // 시간 측정
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    std::cout << "소요 시간: " << duration.count() << " ms" << std::endl;
+
+    return 0;
 }

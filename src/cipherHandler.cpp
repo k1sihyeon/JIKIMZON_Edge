@@ -45,8 +45,12 @@ void CipherHandler::loadKey(const std::string& path)
     memcpy(mKey, key, 32);
 }
 
-void CipherHandler::EncryptData(std::string& timestamp, std::vector<uint8_t>& src, int size, std::vector<uint8_t>& dest)
+
+std::vector<uint8_t> CipherHandler::EncryptData(std::string timestamp, std::vector<uint8_t> src, int size)
 {   
+    std::vector<uint8_t> dest;
+    dest.resize(size);
+
     unsigned char iv[12];
     std::memcpy(iv, reinterpret_cast<const unsigned char*>(timestamp.substr(timestamp.length() - 12, 12).c_str()), 12);
 
@@ -60,4 +64,6 @@ void CipherHandler::EncryptData(std::string& timestamp, std::vector<uint8_t>& sr
     {
         std::cerr << "Error: encrypt update" << std::endl;
     }
+
+    return dest;
 }
