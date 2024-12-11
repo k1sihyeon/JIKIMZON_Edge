@@ -1,7 +1,7 @@
 # JIKIMZON_Edge
 
 ## Run
-### Install Libraries
+### ① Install Libraries
 ``` bash
 sudo apt-get update
 sudo apt-get install -y \
@@ -14,14 +14,14 @@ sudo apt-get install -y \
     libcrypto++-dev
 ```
 
-### Build
+### ② Build
 ``` bash
 git clone https://github.com/VEDA-tmpa/JIKIMZON_Edge.git
 cd JIKIMZON_Edge
 ./build.sh
 ```
 
-### Run
+### ③ Run
 ``` bash
 ./edge.out <frame port num> <json port num>
 ```
