@@ -2,11 +2,11 @@
 #include "tcpHandler.hpp"
 #include "encodeHandler.hpp"
 #include "objectHandler.hpp"
-//#include "cipherHandler.hpp"
 #include "preprocessHandler.hpp"
 #include "frame.hpp"
 #include "utils.hpp"
 #include "tlsHandler.hpp"
+//#include "cipherHandler.hpp" // (deprecated)
 
 #include <cstdint>
 #include <nlohmann/json.hpp>
@@ -42,7 +42,7 @@ int main(int argc, char** argv)
     TcpHandler jsonTcpHandler;
     ObjectHandler objHandler;
     EncodeHandler encodeHandler(width, height, bitrate, fps, gopSize);
-    //  CipherHandler cipherHandler;
+    // EncryptHandler cipherHandler; // (deprecated)
 
     // Get current working directory
     std::string path = utils.GetWorkingDir();
@@ -59,7 +59,6 @@ int main(int argc, char** argv)
     uint32_t frameId = 0;
     std::string timestamp;
     std::vector<uint8_t> encodedFrame;
-    //std::vector<uint8_t> encryptedFrame;
     object::Detection detections;
     nlohmann::json json;
 
@@ -81,14 +80,13 @@ int main(int argc, char** argv)
         timestamp = utils.GetCurrentTime();
 
         // 전처리
-        // segmentation fault
-        // PreprocessHandler preproHandler(inFrame, OUT pFrame);
-        // preproHandler.Threading();
+        PreprocessHandler preproHandler(inFrame, OUT pFrame);
+        preproHandler.Threading();
 
         // 모델 추론
-        objHandler.DetectObject(inFrame, timestamp, OUT detections);
+        objHandler.DetectObject(pFrame, timestamp, OUT detections);
         
-        // 탐지 결과 JSON 전송
+        // 탐지 결과 JSON TLS전송
         if (!detections.vObj.empty())
         {
             objHandler.CreateJson(frameId, detections, OUT json);
@@ -101,13 +99,13 @@ int main(int argc, char** argv)
         }
         
         // h.264 압축
-        encodeHandler.EncodeFrame(inFrame, OUT encodedFrame);
+        encodeHandler.EncodeFrame(pFrame, OUT encodedFrame);
 
-        // 암호화
-        //encryptedFrame.resize(encodedFrame.size());
-        //cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), OUT encryptedFrame);
+        // chacha20 암호화 (deprecated)
+        // encryptedFrame.resize(encodedFrame.size());
+        // cipherHandler.EncryptData(timestamp, encodedFrame, encodedFrame.size(), OUT encryptedFrame);
     
-        // frame header 설정
+        // frame header 설정 및 Serialize
         headerStruct.frameId    = static_cast<uint32_t>(frameId);
         headerStruct.bodySize   = static_cast<uint32_t>(encodedFrame.size());
         headerStruct.imageWidth = static_cast<uint16_t>(width);
@@ -128,10 +126,10 @@ int main(int argc, char** argv)
         // frame body 설정
         frame::Body body(encodedFrame);
 
-        // Frame 객체 설정
+        // Frame 객체(header + body) 설정
         frame.SetFrame(header, body);
 
-        // Frame 객체 Serialize 후 전송
+        // Frame 객체 Serialize 후 TLS 전송
         frame.Serialize(OUT buffer);
         frameTLS.SendData(buffer);
         
@@ -140,8 +138,8 @@ int main(int argc, char** argv)
         std::cout << "Encoded Frame body Size: " << encodedFrame.size() << std::endl;
         // std::cout << "Deserialized Frame Size: " << deserializedFrame.GetBody().GetImage().size() << std::endl;
         std::cout << "=====================================" << std::endl;
-        // 디버깅용 화면 출력
-        // capHandler.ShowFrame(inFrame, detections); // capHandler.ShowFrame(inFrame);
+            // 디버깅용 화면 출력
+            // capHandler.ShowFrame(pFrame, detections); // capHandler.ShowFrame("original", inFrame); // capHandler.ShowFrame("preprocess", pFrame);
 
         // frame ID 증가
         frameId += 1;

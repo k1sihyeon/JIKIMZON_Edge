@@ -13,10 +13,10 @@ public:
     void Exposure(const int start, const int end);
 
 private:
-    cv::Mat& src;
-    cv::Mat& dest;
+    cv::Mat& mSrc;
+    cv::Mat& mDest;
 
-    cv::Mat cumulativeHist;
+    cv::Mat mCumulativeHist;
 };
 
 #endif

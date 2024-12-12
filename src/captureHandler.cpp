@@ -31,9 +31,9 @@ bool CaptureHandler::GetFrame(cv::Mat& frame)
     return true;
 }
 
-void CaptureHandler::ShowFrame(cv::Mat& inFrame)
+void CaptureHandler::ShowFrame(std::string title, cv::Mat& inFrame)
 {
-    cv::imshow("raw frame", inFrame);
+    cv::imshow(title, inFrame);
     cv::waitKey(10);
 }
 

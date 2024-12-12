@@ -12,7 +12,7 @@ public:
 
     void InitCapture(int, int, int, int);
     bool GetFrame(cv::Mat&);
-    void ShowFrame(cv::Mat&);
+    void ShowFrame(std::string, cv::Mat&);
     void ShowFrame(cv::Mat&, object::Detection&);
 
 private:
