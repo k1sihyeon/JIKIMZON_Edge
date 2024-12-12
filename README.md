@@ -1,7 +1,8 @@
 # JIKIMZON_Edge
 
 ## 개발 환경
-- Raspberry Pi 5 + pi Camera
+- Raspberry Pi 5
+- Raspberry Pi Camera Rev 1.3
 
 
 ## 튜토리얼
@@ -18,12 +19,14 @@ sudo apt-get install -y \
     libcrypto++-dev
 ```
 
+
 ### ② 빌드
 ``` bash
 git clone https://github.com/VEDA-tmpa/JIKIMZON_Edge.git
 cd JIKIMZON_Edge
 ./build.sh
 ```
+
 
 ### ③ 실행
 ``` bash
@@ -41,27 +44,24 @@ LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libcamera/v4l2-compat.so ./edge.out <frame
 
 
 ## 스택
-- Language
+- Language   
   - C++
 
-- Libraries
-  - opencv
-  - openssl
-  - libavcodec
-  - libavformat
-  - libavutil
-  - libswscale
-  - libcrypto
-
+- Libraries   
+  - opencv (4.6.0)
+  - openssl (3.0.15)
+  - ffmpeg (5.1.6)
+   
 - Model
-  - yolov5 (https://huggingface.co/keremberke/yolov5n-garbage)
+  - [yolov5n-garbage](https://huggingface.co/keremberke/yolov5n-garbage) (converted into onnx format)
+
 
 ## 기능
-- 전처리
+- 쓰레딩을 통한 프레임 전처리
 - H.264 인코딩
 - 쓰레기 객체 탐지
 - 데이터 직렬화
-- TLS 송신
+- TLS 송신   
 
 
 ## 프로젝트 구조
