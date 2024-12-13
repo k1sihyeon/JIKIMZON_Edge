@@ -51,6 +51,7 @@ LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libcamera/v4l2-compat.so ./edge.out <frame
   - opencv (4.6.0)
   - openssl (3.0.15)
   - ffmpeg (5.1.6)
+  - nlohmann_json (3.11.3)
    
 - Model
   - [yolov5n-garbage](https://huggingface.co/keremberke/yolov5n-garbage) (converted into onnx format)
