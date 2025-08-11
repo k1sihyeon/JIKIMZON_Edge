@@ -1,4 +1,5 @@
-# JIKIMZON_Edge
+# [JIKIMZON](https://github.com/VEDA-tmpa)_Edge
+
 
 ## 개발 환경
 - Raspberry Pi 5
